@@ -1,5 +1,18 @@
+"use client";
+
 import Link from "next/link";
-import { Building2, Bell, PlusCircle, Search, User, Shield, Store, ExternalLink } from "lucide-react";
+import {
+  Building2,
+  Bell,
+  PlusCircle,
+  Search,
+  User,
+  Shield,
+  Store,
+  ExternalLink,
+  PanelLeft,
+} from "lucide-react";
+import { useSidebar } from "@/context/SidebarContext";
 
 interface HeaderProps {
   companyName?: string;
@@ -14,10 +27,24 @@ export function Header({
   userName = "Carlos Mendoza",
   userRole = "Administrador",
 }: HeaderProps) {
+  const { isOpen, toggleSidebar } = useSidebar();
+
   return (
-    <header className="h-16 bg-white border-b border-[#E2E8F0] px-6 flex items-center justify-between sticky top-0 z-30 shadow-xs">
-      {/* Selector de Empresa */}
-      <div className="flex items-center gap-3">
+    <header className="h-16 bg-white border-b border-[#E2E8F0] px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30 shadow-xs">
+      {/* Botón Alternar Barra Lateral + Selector de Empresa */}
+      <div className="flex items-center gap-2.5 sm:gap-3">
+        <button
+          onClick={toggleSidebar}
+          className="p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 shadow-2xs transition-all active:scale-95 flex items-center gap-1.5"
+          title={isOpen ? "Ocultar menú lateral" : "Mostrar menú lateral"}
+          aria-label="Alternar barra lateral"
+        >
+          <PanelLeft className="w-5 h-5 text-[#2563EB]" />
+          <span className="hidden md:inline text-xs font-semibold text-slate-600">
+            {isOpen ? "Ocultar menú" : "Mostrar menú"}
+          </span>
+        </button>
+
         <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg bg-slate-50 border border-[#E2E8F0] hover:bg-slate-100 transition-colors cursor-pointer">
           <div className="w-7 h-7 rounded-md bg-[#2563EB] text-white flex items-center justify-center font-bold text-xs shadow-xs">
             <Building2 className="w-4 h-4" />

@@ -14,9 +14,12 @@ import {
   TrendingUp,
   BookOpen,
   ShoppingBag,
+  PanelLeftClose,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { JexiaLogo } from "@/components/JexiaLogo";
+import { useSidebar } from "@/context/SidebarContext";
 
 interface NavItem {
   title: string;
@@ -84,14 +87,30 @@ const navItems: NavItem[] = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { isOpen, closeSidebar } = useSidebar();
 
   return (
-    <aside className="w-64 bg-gradient-to-b from-[#0F172A] to-[#0F4C81] text-white flex flex-col shrink-0 min-h-screen border-r border-[#1E3A5F]/70 shadow-xl">
+    <aside
+      className={cn(
+        "bg-gradient-to-b from-[#0F172A] to-[#0F4C81] text-white flex flex-col shrink-0 min-h-screen border-r border-[#1E3A5F]/70 shadow-xl transition-all duration-300 ease-in-out z-40",
+        "fixed inset-y-0 left-0 lg:static",
+        isOpen
+          ? "w-64 translate-x-0 lg:ml-0 opacity-100"
+          : "w-64 -translate-x-full lg:-ml-64 pointer-events-none opacity-0"
+      )}
+    >
       {/* Brand Header: Fondo blanco (#FFFFFF) con borde inferior #E2E8F0 para contraste óptimo */}
-      <div className="p-3.5 bg-white border-b border-[#E2E8F0] flex items-center justify-center">
-        <Link href="/inicio" className="block hover:opacity-95 transition-opacity">
-          <JexiaLogo width={180} height={46} className="w-auto h-11" />
+      <div className="p-3 bg-white border-b border-[#E2E8F0] flex items-center justify-between">
+        <Link href="/inicio" className="block hover:opacity-95 transition-opacity pl-1">
+          <JexiaLogo width={165} height={42} className="w-auto h-10" />
         </Link>
+        <button
+          onClick={closeSidebar}
+          className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
+          title="Ocultar barra lateral"
+        >
+          <PanelLeftClose className="w-4 h-4" />
+        </button>
       </div>
 
       {/* SUNAT Badge */}

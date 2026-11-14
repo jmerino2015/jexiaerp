@@ -195,6 +195,44 @@ async function main() {
   });
 
   // 8. Productos
+  const pDemo = await prisma.product.create({
+    data: {
+      companyId: company.id,
+      sku: "POLO-ROJ-L",
+      name: "POLO VERANO COLOR ROJO TALLA L",
+      unitCode: ProductUnitCode.NIU,
+      avgCost: 22.0,
+      lastCost: 22.0,
+      salePrice: 45.0,
+      minStock: 15,
+      category: "Textil y Confecciones",
+      stocks: {
+        create: {
+          warehouseId: warehouse.id,
+          quantity: 150,
+        },
+      },
+    },
+  });
+
+  await prisma.kardexMovement.create({
+    data: {
+      companyId: company.id,
+      productId: pDemo.id,
+      warehouseId: warehouse.id,
+      movementType: KardexType.INICIAL,
+      documentType: "INICIAL",
+      documentNumber: "INV-INICIAL-POLO-ROJO",
+      quantity: 150,
+      unitCost: 22.0,
+      totalCost: 3300.0,
+      balanceQty: 150,
+      balanceUnitCost: 22.0,
+      balanceTotal: 3300.0,
+      notes: "Stock inicial demo: POLO VERANO COLOR ROJO TALLA L",
+    },
+  });
+
   const p1 = await prisma.product.create({
     data: {
       companyId: company.id,
