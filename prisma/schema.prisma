@@ -1,0 +1,514 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PartnerDocType {
+  DNI
+  RUC
+  CE
+  PASAPORTE
+}
+
+enum ProductUnitCode {
+  NIU // Unidades (Bienes)
+  ZZ  // Servicios
+  BX  // Cajas
+  KGM // Kilogramos
+  MTR // Metros
+}
+
+enum IgvType {
+  GRAVADO_10   // 10 - Gravado - Operación Onerosa
+  EXONERADO_20 // 20 - Exonerado - Operación Onerosa
+  INAFECTO_30  // 30 - Inafecto - Operación Onerosa
+}
+
+enum KardexType {
+  INICIAL
+  ENTRADA_COMPRA
+  SALIDA_VENTA
+  AJUSTE_POSITIVO
+  AJUSTE_NEGATIVO
+}
+
+enum PurchaseStatus {
+  BORRADOR
+  EMITIDA
+  RECIBIDA_PARCIAL
+  COMPLETADA
+  ANULADA
+}
+
+enum SalesDocType {
+  FACTURA      // 01
+  BOLETA       // 03
+  COTIZACION   // COT
+  NOTA_CREDITO // 07
+  NOTA_DEBITO  // 08
+}
+
+enum SalesStatus {
+  BORRADOR
+  EMITIDO
+  ANULADO
+}
+
+enum SunatStatus {
+  NO_APLICA
+  PENDIENTE
+  ACEPTADO
+  RECHAZADO
+  OBSERVADO
+}
+
+enum PaymentMethod {
+  EFECTIVO
+  TRANSFERENCIA
+  YAPE_PLIN
+  TARJETA
+  CREDITO
+}
+
+enum PaymentStatus {
+  PAGADO
+  PENDIENTE
+  PARCIAL
+}
+
+enum UserRole {
+  ADMIN
+  GERENTE
+  CONTADOR
+  VENDEDOR
+  ALMACENERO
+}
+
+enum AccountCategory {
+  ACTIVO
+  PASIVO
+  PATRIMONIO
+  GASTOS_NATURALEZA
+  INGRESOS
+  SALDOS_INTERMEDIARIOS
+  CUENTAS_ORDEN
+}
+
+enum JournalOrigin {
+  VENTA
+  COMPRA
+  COSTO_VENTAS
+  COBRANZA
+  PAGO
+  MANUAL
+}
+
+model Company {
+  id              String           @id @default(uuid())
+  ruc             String           @unique
+  businessName    String
+  tradeName       String?
+  fiscalAddress   String
+  department      String?          @default("Lima")
+  province        String?          @default("Lima")
+  district        String?          @default("San Isidro")
+  phone           String?
+  email           String?
+  currency        String           @default("PEN")
+  logoUrl         String?
+  urbanization    String?
+  ubigeo          String?          @default("150131")
+  solUser         String?          @default("MODDATOS")
+  solPass         String?          @default("moddatos")
+  certPassword    String?
+  bnAccount       String?          @default("00-068-123456") // Cuenta Banco de la Nación para Detracciones
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  users           User[]
+  partners        Partner[]
+  warehouses      Warehouse[]
+  products        Product[]
+  kardexMovements KardexMovement[]
+  purchaseOrders  PurchaseOrder[]
+  documentSeries  DocumentSeries[]
+  salesDocuments  SalesDocument[]
+  accountPlans    AccountPlan[]
+  journalEntries  JournalEntry[]
+  ecommerceOrders EcommerceOrder[]
+}
+
+model User {
+  id           String    @id @default(uuid())
+  companyId    String
+  email        String    @unique
+  passwordHash String
+  fullName     String
+  role         UserRole  @default(ADMIN)
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  company      Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  salesCreated SalesDocument[]
+  purchasesCreated PurchaseOrder[]
+}
+
+model Partner {
+  id           String         @id @default(uuid())
+  companyId    String
+  docType      PartnerDocType @default(RUC)
+  docNumber    String         // 11 dígitos RUC o 8 dígitos DNI
+  legalName    String         // Razón social o Nombres y Apellidos
+  tradeName    String?
+  address      String?
+  department   String?
+  province     String?
+  district     String?
+  phone        String?
+  email        String?
+  isCustomer   Boolean        @default(true)
+  isSupplier   Boolean        @default(false)
+  isActive     Boolean        @default(true)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  company      Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  salesDocs    SalesDocument[]
+  purchaseOrders PurchaseOrder[]
+
+  @@unique([companyId, docNumber])
+}
+
+model Warehouse {
+  id              String           @id @default(uuid())
+  companyId       String
+  code            String           // e.g. "ALM01"
+  name            String           // "Almacén Principal"
+  address         String?
+  isDefault       Boolean          @default(false)
+  isActive        Boolean          @default(true)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  company         Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  productStocks   ProductStock[]
+  kardexMovements KardexMovement[]
+  purchaseOrders  PurchaseOrder[]
+  salesDocuments  SalesDocument[]
+
+  @@unique([companyId, code])
+}
+
+model Product {
+  id              String           @id @default(uuid())
+  companyId       String
+  sku             String           // Código interno o de barras
+  name            String
+  description     String?
+  unitCode        ProductUnitCode  @default(NIU)
+  igvType         IgvType          @default(GRAVADO_10)
+  avgCost         Float            @default(0.0) // Costo promedio ponderado en PEN
+  lastCost        Float            @default(0.0) // Último costo de compra
+  salePrice       Float            @default(0.0) // Precio de venta sin IGV o con IGV
+  minStock        Float            @default(5.0) // Alerta de stock mínimo
+  isService       Boolean          @default(false)
+  category        String?          @default("General")
+  detractionSubject Boolean        @default(false) // Si está sujeto a detracción SPOT
+  detractionCode   String?         // Catálogo 54 SUNAT
+  detractionPercent Float?         // % SPOT ej 12%
+  isActive        Boolean          @default(true)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  company         Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  stocks          ProductStock[]
+  kardexMovements KardexMovement[]
+  purchaseItems   PurchaseOrderItem[]
+  salesItems      SalesDocumentItem[]
+
+  @@unique([companyId, sku])
+}
+
+model ProductStock {
+  id          String    @id @default(uuid())
+  productId   String
+  warehouseId String
+  quantity    Float     @default(0.0)
+  updatedAt   DateTime  @updatedAt
+
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  warehouse   Warehouse @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, warehouseId])
+}
+
+model KardexMovement {
+  id              String      @id @default(uuid())
+  companyId       String
+  productId       String
+  warehouseId     String
+  movementType    KardexType
+  documentType    String      // "01", "03", "07", "OC", "AJUSTE", "INICIAL"
+  documentNumber  String      // "F001-000001", "OC-00001", etc.
+  quantity        Float       // Cantidad ingresada (+) o salida (-)
+  unitCost        Float       // Costo unitario de la transacción
+  totalCost       Float       // Importe total de la transacción
+  balanceQty      Float       // Stock resultante acumulado
+  balanceUnitCost Float       // Nuevo costo promedio ponderado acumulado
+  balanceTotal    Float       // Valorización total del inventario
+  notes           String?
+  createdAt       DateTime    @default(now())
+
+  company         Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  product         Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  warehouse       Warehouse   @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+}
+
+model DocumentSeries {
+  id            String       @id @default(uuid())
+  companyId     String
+  docType       SalesDocType
+  series        String       // "F001", "B001", "COT1", "FC01" (Nota Crédito Factura), "BC01" (Nota Crédito Boleta)
+  currentNumber Int          @default(0)
+  description   String?
+  isActive      Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  company       Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, docType, series])
+}
+
+model PurchaseOrder {
+  id              String          @id @default(uuid())
+  companyId       String
+  warehouseId     String
+  supplierId      String
+  userId          String?
+  series          String          @default("OC01")
+  number          Int
+  fullNumber      String          // "OC01-000001"
+  issueDate       DateTime        @default(now())
+  expectedDate    DateTime?
+  status          PurchaseStatus  @default(BORRADOR)
+  supplierInvoice String?         // Ej: Factura F001-8942 entregada por el proveedor
+  subtotal        Float           @default(0.0)
+  igv             Float           @default(0.0)
+  total           Float           @default(0.0)
+  notes           String?
+  receivedAt      DateTime?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  company         Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  warehouse       Warehouse       @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+  supplier        Partner         @relation(fields: [supplierId], references: [id], onDelete: Restrict)
+  createdByUser   User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  items           PurchaseOrderItem[]
+
+  @@unique([companyId, fullNumber])
+}
+
+model PurchaseOrderItem {
+  id              String        @id @default(uuid())
+  purchaseOrderId String
+  productId       String
+  quantity        Float
+  receivedQty     Float         @default(0.0)
+  unitCost        Float
+  subtotal        Float
+  igv             Float
+  total           Float
+
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  product         Product       @relation(fields: [productId], references: [id], onDelete: Restrict)
+}
+
+model SalesDocument {
+  id                String             @id @default(uuid())
+  companyId         String
+  warehouseId       String
+  customerId        String
+  userId            String?
+  docType           SalesDocType       // FACTURA, BOLETA, COTIZACION, NOTA_CREDITO, NOTA_DEBITO
+  sunatCode         String             // "01", "03", "COT", "07", "08"
+  series            String             // "F001", "B001", "COT1", "FC01"
+  number            Int
+  fullNumber        String             // "F001-000001"
+  issueDate         DateTime           @default(now())
+  dueDate           DateTime?
+  currency          String             @default("PEN")
+  subtotalGravado   Float              @default(0.0)
+  subtotalExonerado Float              @default(0.0)
+  subtotalInafecto  Float              @default(0.0)
+  igvAmount         Float              @default(0.0)
+  totalAmount       Float              @default(0.0)
+  status            SalesStatus        @default(EMITIDO)
+  sunatStatus       SunatStatus        @default(PENDIENTE)
+  sunatResponseCode String?
+  sunatDescription  String?
+  sunatCdrHash      String?
+  sunatTicket       String?
+  xmlContent        String?            @db.Text // Archivo XML UBL 2.1 completo
+  cdrXmlContent     String?            @db.Text // Archivo CDR XML oficial firmado
+  paymentMethod     PaymentMethod      @default(EFECTIVO)
+  paymentStatus     PaymentStatus      @default(PAGADO)
+  notes             String?
+  convertedToDocId  String?            // Referencia si esta cotización se convirtió en Factura/Boleta
+
+  // Normativa SPOT SUNAT (Detracciones)
+  detractionApplied Boolean            @default(false)
+  detractionCode    String?            // Catálogo 54 (ej: "022" Otros servicios empresariales)
+  detractionPercent Float?             @default(0.0) // 10% o 12%
+  detractionAmount  Float?             @default(0.0)
+  bnAccount         String?            // Cuenta Banco de la Nación
+
+  // Normativa Notas de Crédito / Débito (Catálogos 09 / 10 SUNAT)
+  relatedDocType    String?            // Tipo de documento que modifica ("01" o "03")
+  relatedDocNumber  String?            // Ej: "F001-000010"
+  creditDebitReason String?            // Código Catálogo 09 ("01" Anulación de operación, "07" Devolución total, etc.)
+
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  company           Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  warehouse         Warehouse          @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
+  customer          Partner            @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  seller            User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+  items             SalesDocumentItem[]
+
+  @@unique([companyId, fullNumber])
+}
+
+model SalesDocumentItem {
+  id              String        @id @default(uuid())
+  salesDocumentId String
+  productId       String
+  sku             String
+  name            String
+  quantity        Float
+  unitCost        Float         @default(0.0) // Costo promedio histórico al momento de venta
+  unitPrice       Float         // Precio unitario
+  igvType         IgvType       @default(GRAVADO_10)
+  subtotal        Float
+  igvAmount       Float
+  totalAmount     Float
+
+  salesDocument   SalesDocument @relation(fields: [salesDocumentId], references: [id], onDelete: Cascade)
+  product         Product       @relation(fields: [productId], references: [id], onDelete: Restrict)
+}
+
+// ==============================================================================
+// MÓDULO CONTABLE SEGÚN NORMATIVAS SUNAT & PLAN CONTABLE GENERAL EMPRESARIAL (PCGE)
+// ==============================================================================
+
+model AccountPlan {
+  id          String          @id @default(uuid())
+  companyId   String
+  code        String          // e.g. "1212", "40111", "70121", "6011", "4212"
+  name        String          // "Emitidas en cartera", "IGV - Cuenta propia"
+  element     Int             // 1, 2, 3, 4, 5, 6, 7, 8, 9, 0
+  category    AccountCategory
+  isActive    Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+
+  company     Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, code])
+}
+
+model JournalEntry {
+  id          String            @id @default(uuid())
+  companyId   String
+  entryNumber Int               // Número correlativo de asiento en el Libro Diario
+  period      String            // e.g. "2025-11"
+  date        DateTime          @default(now())
+  glosa       String            // Concepto del asiento
+  originType  JournalOrigin     @default(MANUAL)
+  originId    String?           // Id de SalesDocument o PurchaseOrder
+  totalDebit  Float             @default(0.0)
+  totalCredit Float             @default(0.0)
+  isBalanced  Boolean           @default(true)
+  createdAt   DateTime          @default(now())
+
+  company     Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  lines       JournalEntryLine[]
+
+  @@unique([companyId, entryNumber, period])
+}
+
+model JournalEntryLine {
+  id             String       @id @default(uuid())
+  journalEntryId String
+  accountCode    String       // "1212", "40111", etc.
+  accountName    String
+  debit          Float        @default(0.0)
+  credit         Float        @default(0.0)
+  docReference   String?      // "F001-000010"
+  partnerName    String?
+
+  journalEntry   JournalEntry @relation(fields: [journalEntryId], references: [id], onDelete: Cascade)
+}
+
+// ==============================================================================
+// MÓDULO DE VENTAS RETAIL POR E-COMMERCE
+// ==============================================================================
+
+enum EcommerceOrderStatus {
+  NUEVO
+  PAGADO_PREPARANDO
+  EN_RUTA_DELIVERY
+  ENTREGADO
+  CANCELADO
+}
+
+model EcommerceOrder {
+  id                 String               @id @default(uuid())
+  companyId          String
+  orderNumber        String               // e.g. "ECO-2025-0001"
+  customerName       String
+  customerDocType    String               // "DNI" o "RUC"
+  customerDocNumber  String
+  customerEmail      String
+  customerPhone      String
+  deliveryMethod     String               // "DELIVERY" o "PICKUP"
+  deliveryAddress    String?
+  deliveryCity       String?              @default("Lima")
+  shippingCost       Float                @default(0.0)
+  paymentMethod      String               // "YAPE_PLIN", "TARJETA", "TRANSFERENCIA"
+  paymentStatus      String               @default("PAGADO")
+  orderStatus        EcommerceOrderStatus @default(PAGADO_PREPARANDO)
+  subtotal           Float
+  igv                Float
+  total              Float
+  salesDocumentId    String?              // Id del comprobante electrónico emitido (Factura/Boleta)
+  salesDocumentNumber String?             // e.g. "B001-000030"
+  trackingNotes      String?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+
+  company            Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  items              EcommerceOrderItem[]
+
+  @@unique([companyId, orderNumber])
+}
+
+model EcommerceOrderItem {
+  id               String         @id @default(uuid())
+  ecommerceOrderId String
+  productId        String
+  productName      String
+  sku              String
+  quantity         Float
+  unitPrice        Float
+  total            Float
+
+  ecommerceOrder   EcommerceOrder @relation(fields: [ecommerceOrderId], references: [id], onDelete: Cascade)
+}
+
