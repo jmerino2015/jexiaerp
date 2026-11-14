@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { formatPEN, formatDate } from "@/lib/utils";
+import { JexiaLogo } from "@/components/JexiaLogo";
 import { SunatService } from "@/lib/sunat";
 import {
   Printer,
@@ -182,21 +183,16 @@ export function DocumentViewerModal({
                FORMATO A4 TRIBUTARIO SUNAT
                ======================================================== */
             <div className="bg-white w-full max-w-[760px] p-8 shadow-sm border border-slate-200 text-slate-900 text-xs font-sans space-y-6">
-              {/* Header Empresa y Cuadro SUNAT */}
+              {/* Header Empresa con JexiaLogo Tricolor y Cuadro SUNAT */}
               <div className="flex justify-between items-start gap-4">
                 <div className="space-y-1.5 flex-1">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-[#0F4C81] text-white flex items-center justify-center font-black text-sm">
-                      J
-                    </div>
-                    <div>
-                      <h1 className="font-extrabold text-base text-slate-900 tracking-tight">
-                        {company.name}
-                      </h1>
-                      <p className="text-[11px] font-semibold text-slate-600">{company.tradeName}</p>
-                    </div>
+                  <div className="mb-2">
+                    <JexiaLogo width={200} height={52} className="w-auto h-12" />
                   </div>
-                  <p className="text-[11px] text-slate-600 leading-tight pt-1">
+                  <h1 className="font-extrabold text-sm text-slate-900 tracking-tight">
+                    {company.name}
+                  </h1>
+                  <p className="text-[11px] text-slate-600 leading-tight">
                     {company.address}
                   </p>
                   <p className="text-[11px] text-slate-600">
@@ -360,8 +356,8 @@ export function DocumentViewerModal({
                FORMATO TICKET TÉRMICO 80MM
                ======================================================== */
             <div className="bg-white w-[320px] p-4 shadow-md border border-slate-300 font-mono text-[11px] text-slate-900 space-y-3">
-              <div className="text-center space-y-1">
-                <p className="font-bold text-sm text-[#0F4C81] tracking-tight">JEXIA ERP</p>
+              <div className="text-center space-y-1.5 flex flex-col items-center">
+                <JexiaLogo width={160} height={42} className="w-auto h-9 mx-auto" />
                 <p className="font-bold text-xs">{company.name}</p>
                 <p className="text-[10px] text-slate-600">RUC: {company.ruc}</p>
                 <p className="text-[10px] text-slate-500 leading-tight">{company.address}</p>

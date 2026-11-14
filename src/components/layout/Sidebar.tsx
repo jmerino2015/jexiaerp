@@ -16,6 +16,7 @@ import {
   ShoppingBag,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { JexiaLogo } from "@/components/JexiaLogo";
 
 interface NavItem {
   title: string;
@@ -86,23 +87,10 @@ export function Sidebar() {
 
   return (
     <aside className="w-64 bg-gradient-to-b from-[#0F172A] to-[#0F4C81] text-white flex flex-col shrink-0 min-h-screen border-r border-[#1E3A5F]/70 shadow-xl">
-      {/* Brand Header */}
-      <div className="p-5 border-b border-white/10 flex flex-col gap-1">
-        <Link href="/inicio" className="flex items-center gap-2.5 group">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#2563EB] to-[#1D4ED8] flex items-center justify-center shadow-lg shadow-blue-950/60 group-hover:scale-105 transition-transform">
-            <span className="font-black text-xl text-white tracking-tighter">J</span>
-          </div>
-          <div>
-            <div className="flex items-center gap-1.5">
-              <span className="font-extrabold text-xl tracking-tight text-white">Jexia</span>
-              <span className="font-semibold text-xs px-1.5 py-0.5 rounded bg-[#2563EB]/30 text-sky-200 border border-sky-400/30">
-                ERP
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-300 font-medium leading-none mt-0.5">
-              Claridad operativa sin límites
-            </p>
-          </div>
+      {/* Brand Header: Fondo blanco (#FFFFFF) con borde inferior #E2E8F0 para contraste óptimo */}
+      <div className="p-3.5 bg-white border-b border-[#E2E8F0] flex items-center justify-center">
+        <Link href="/inicio" className="block hover:opacity-95 transition-opacity">
+          <JexiaLogo width={180} height={46} className="w-auto h-11" />
         </Link>
       </div>
 

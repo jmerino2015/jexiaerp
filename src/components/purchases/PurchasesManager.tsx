@@ -15,7 +15,10 @@ import {
   Trash2,
   Clock,
   Layers,
+  Eye,
+  Printer,
 } from "lucide-react";
+import { JexiaLogo } from "@/components/JexiaLogo";
 
 interface SupplierItem {
   id: string;
@@ -71,6 +74,7 @@ export function PurchasesManager({
   const [isNewOrderOpen, setIsNewOrderOpen] = useState(false);
   const [isReceiveModalOpen, setIsReceiveModalOpen] = useState(false);
   const [selectedOrderToReceive, setSelectedOrderToReceive] = useState<PurchaseOrderRecord | null>(null);
+  const [selectedOrderToView, setSelectedOrderToView] = useState<PurchaseOrderRecord | null>(null);
   const [supplierInvoiceNumber, setSupplierInvoiceNumber] = useState("");
 
   const [loading, setLoading] = useState(false);
@@ -265,22 +269,32 @@ export function PurchasesManager({
                         )}
                       </td>
                       <td className="py-3 px-4 text-center">
-                        {!isCompleted ? (
+                        <div className="flex items-center justify-center gap-2">
                           <button
-                            onClick={() => {
-                              setSelectedOrderToReceive(order);
-                              setIsReceiveModalOpen(true);
-                            }}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#10B981] hover:bg-emerald-700 text-white text-[11px] font-bold shadow-xs transition-colors"
+                            onClick={() => setSelectedOrderToView(order)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold border border-slate-300 transition-colors"
+                            title="Ver Orden de Compra (PDF A4)"
                           >
-                            <PackageCheck className="w-3.5 h-3.5" />
-                            <span>Recibir Mercadería</span>
+                            <Eye className="w-3.5 h-3.5 text-slate-600" />
+                            <span>A4</span>
                           </button>
-                        ) : (
-                          <span className="text-[11px] text-slate-400 font-medium">
-                            Kardex aplicado
-                          </span>
-                        )}
+                          {!isCompleted ? (
+                            <button
+                              onClick={() => {
+                                setSelectedOrderToReceive(order);
+                                setIsReceiveModalOpen(true);
+                              }}
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#10B981] hover:bg-emerald-700 text-white text-[11px] font-bold shadow-xs transition-colors"
+                            >
+                              <PackageCheck className="w-3.5 h-3.5" />
+                              <span>Recibir</span>
+                            </button>
+                          ) : (
+                            <span className="text-[11px] text-slate-400 font-medium px-1">
+                              Recibido
+                            </span>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );
@@ -567,6 +581,174 @@ export function PurchasesManager({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* MODAL: VISTA PREVIA ORDEN DE COMPRA (PDF A4) */}
+      {selectedOrderToView && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[92vh] flex flex-col overflow-hidden border border-slate-200">
+            {/* Modal Bar */}
+            <div className="bg-slate-900 text-white px-6 py-3.5 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <ShoppingCart className="w-4 h-4 text-[#2563EB]" />
+                <span className="font-bold text-sm">
+                  Vista Previa Orden de Compra: {selectedOrderToView.fullNumber}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => window.print()}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold transition-colors"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  <span>Imprimir A4</span>
+                </button>
+                <button
+                  onClick={() => setSelectedOrderToView(null)}
+                  className="text-slate-400 hover:text-white transition-colors ml-2"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* A4 Container */}
+            <div className="p-6 overflow-y-auto flex-1 bg-slate-100 flex justify-center">
+              <div className="bg-white w-full max-w-[720px] p-8 shadow-sm border border-slate-200 text-slate-900 text-xs font-sans space-y-6">
+                {/* Header Empresa con JexiaLogo Tricolor */}
+                <div className="flex justify-between items-start gap-4">
+                  <div className="space-y-1.5 flex-1">
+                    <div className="mb-2">
+                      <JexiaLogo width={190} height={50} className="w-auto h-11" />
+                    </div>
+                    <h1 className="font-extrabold text-sm text-slate-900 tracking-tight">
+                      JEXIA TECH SOLUTIONS S.A.C.
+                    </h1>
+                    <p className="text-[11px] text-slate-600 leading-tight">
+                      Av. Rivera Navarrete 501, Piso 14, San Isidro, Lima - Perú
+                    </p>
+                    <p className="text-[11px] text-slate-600">
+                      Teléf: +51 1 719-8400 | Email: compras@jexia.pe
+                    </p>
+                  </div>
+
+                  {/* Cuadro Identificador OC */}
+                  <div className="w-60 border-2 border-slate-800 rounded-lg p-3 text-center shrink-0 bg-slate-50">
+                    <p className="font-bold text-xs tracking-wider">R.U.C. N° 20608945123</p>
+                    <div className="bg-slate-900 text-white font-bold py-1 my-1.5 text-xs tracking-wide">
+                      ORDEN DE COMPRA
+                    </div>
+                    <p className="font-mono font-bold text-sm tracking-wider text-[#2563EB]">
+                      N° {selectedOrderToView.fullNumber}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Datos del Proveedor */}
+                <div className="border border-slate-200 rounded-lg p-3.5 bg-slate-50/70 space-y-1.5">
+                  <div className="grid grid-cols-12 gap-2">
+                    <div className="col-span-8">
+                      <span className="font-semibold text-slate-500 text-[10px] uppercase">
+                        Proveedor:
+                      </span>
+                      <p className="font-bold text-slate-800">
+                        {selectedOrderToView.supplier.legalName}
+                      </p>
+                    </div>
+                    <div className="col-span-4">
+                      <span className="font-semibold text-slate-500 text-[10px] uppercase">
+                        R.U.C. Proveedor:
+                      </span>
+                      <p className="font-mono font-bold text-slate-800">
+                        {selectedOrderToView.supplier.docNumber}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-12 gap-2 pt-1 border-t border-slate-200">
+                    <div className="col-span-6">
+                      <span className="font-semibold text-slate-500 text-[10px] uppercase">
+                        Fecha de Emisión:
+                      </span>
+                      <p className="text-slate-800">{formatDate(selectedOrderToView.issueDate)}</p>
+                    </div>
+                    <div className="col-span-6">
+                      <span className="font-semibold text-slate-500 text-[10px] uppercase">
+                        Factura Proveedor Asociada:
+                      </span>
+                      <p className="font-mono font-semibold text-slate-800">
+                        {selectedOrderToView.supplierInvoice || "Pendiente de recepción"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Items */}
+                <table className="w-full text-left border-collapse border border-slate-200 text-xs">
+                  <thead className="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+                    <tr>
+                      <th className="py-2 px-3 text-center w-12">Cant.</th>
+                      <th className="py-2 px-2 text-center w-14">Unidad</th>
+                      <th className="py-2 px-3 w-24">SKU</th>
+                      <th className="py-2 px-3">Descripción del Producto</th>
+                      <th className="py-2 px-3 text-right w-24">Costo Unit.</th>
+                      <th className="py-2 px-3 text-right w-24">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200">
+                    {selectedOrderToView.items.map((it) => (
+                      <tr key={it.id}>
+                        <td className="py-2 px-3 text-center font-mono font-semibold tabular-nums">
+                          {it.quantity}
+                        </td>
+                        <td className="py-2 px-2 text-center text-slate-500">
+                          {it.product.unitCode}
+                        </td>
+                        <td className="py-2 px-3 font-mono text-[11px] text-slate-600">
+                          {it.product.sku}
+                        </td>
+                        <td className="py-2 px-3 font-medium text-slate-800">{it.product.name}</td>
+                        <td className="py-2 px-3 text-right font-mono tabular-nums">
+                          {formatPEN(it.unitCost)}
+                        </td>
+                        <td className="py-2 px-3 text-right font-mono font-bold tabular-nums">
+                          {formatPEN(it.total)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                {/* Totales */}
+                <div className="flex justify-end">
+                  <div className="w-64 space-y-1.5 border border-slate-200 rounded-lg p-3 bg-slate-50 text-right">
+                    <div className="flex justify-between text-slate-600">
+                      <span>Subtotal:</span>
+                      <span className="font-mono tabular-nums">
+                        {formatPEN(selectedOrderToView.subtotal)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-slate-600">
+                      <span>I.G.V. (18%):</span>
+                      <span className="font-mono tabular-nums">
+                        {formatPEN(selectedOrderToView.igv)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between font-bold text-sm border-t border-slate-300 pt-1 text-[#2563EB]">
+                      <span>TOTAL ORDEN:</span>
+                      <span className="font-mono tabular-nums">
+                        {formatPEN(selectedOrderToView.total)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-slate-200 text-center text-[10px] text-slate-500">
+                  Documento emitido para adquisición de mercadería sujeta a recálculo de Costo Promedio Ponderado en Kardex.
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
