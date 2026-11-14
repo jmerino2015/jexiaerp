@@ -15,6 +15,13 @@ export async function createProduct(formData: {
   minStock: number;
   isService: boolean;
   category?: string;
+  brand?: string;
+  sunatCode?: string;
+  imageUrl?: string;
+  isEcommerce?: boolean;
+  detractionSubject?: boolean;
+  detractionCode?: string;
+  detractionPercent?: number;
   initialStock?: number;
 }) {
   try {
@@ -50,6 +57,13 @@ export async function createProduct(formData: {
           minStock: minStock,
           isService: formData.isService,
           category: formData.category?.trim() || "General",
+          brand: formData.brand?.trim(),
+          sunatCode: formData.sunatCode?.trim(),
+          imageUrl: formData.imageUrl?.trim(),
+          isEcommerce: formData.isEcommerce ?? true,
+          detractionSubject: formData.detractionSubject ?? false,
+          detractionCode: formData.detractionCode?.trim(),
+          detractionPercent: formData.detractionPercent ? Number(formData.detractionPercent) : null,
         },
       });
 
@@ -87,8 +101,11 @@ export async function createProduct(formData: {
       return product;
     });
 
-    revalidatePath("/inventario");
-    revalidatePath("/inicio");
+    try {
+      revalidatePath("/inventario");
+      revalidatePath("/inicio");
+      revalidatePath("/tienda");
+    } catch {}
     return { success: true, data: result };
   } catch (error: any) {
     console.error("Error creating product:", error);
@@ -186,8 +203,11 @@ export async function createInventoryAdjustment(formData: {
       return { newStock };
     });
 
-    revalidatePath("/inventario");
-    revalidatePath("/inicio");
+    try {
+      revalidatePath("/inventario");
+      revalidatePath("/inicio");
+      revalidatePath("/tienda");
+    } catch {}
     return { success: true, data: result };
   } catch (error: any) {
     console.error("Error adjusting inventory:", error);

@@ -29,6 +29,12 @@ export default async function InventarioPage() {
       minStock: p.minStock,
       isService: p.isService,
       totalStock: totalStock,
+      imageUrl: p.imageUrl,
+      brand: p.brand,
+      sunatCode: p.sunatCode,
+      isEcommerce: p.isEcommerce,
+      detractionSubject: p.detractionSubject,
+      detractionPercent: p.detractionPercent,
     };
   });
 

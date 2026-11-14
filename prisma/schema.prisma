@@ -218,6 +218,10 @@ model Product {
   minStock        Float            @default(5.0) // Alerta de stock mínimo
   isService       Boolean          @default(false)
   category        String?          @default("General")
+  brand           String?          // Marca comercial
+  sunatCode       String?          // Código de producto SUNAT Catálogo 25 (ej: 53102902)
+  imageUrl        String?          // Fotografía principal del producto
+  isEcommerce     Boolean          @default(true) // Habilitado para venta en tienda retail
   detractionSubject Boolean        @default(false) // Si está sujeto a detracción SPOT
   detractionCode   String?         // Catálogo 54 SUNAT
   detractionPercent Float?         // % SPOT ej 12%

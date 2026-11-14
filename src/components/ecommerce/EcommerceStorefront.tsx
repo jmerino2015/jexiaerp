@@ -33,6 +33,8 @@ interface StoreProduct {
   sku: string;
   name: string;
   category: string | null;
+  brand?: string | null;
+  imageUrl?: string | null;
   salePrice: number;
   totalStock: number;
   unitCode: string;
@@ -267,12 +269,20 @@ export function EcommerceStorefront({ products }: { products: StoreProduct[] }) 
                 key={p.id}
                 className="bg-white rounded-xl border border-[#E2E8F0] overflow-hidden shadow-xs hover:shadow-md transition-all flex flex-col group"
               >
-                {/* Imagen Simbólica / Ícono */}
-                <div className="h-40 bg-slate-50 border-b border-[#E2E8F0] flex items-center justify-center p-4 relative group-hover:scale-[1.02] transition-transform">
-                  <div className="w-16 h-16 rounded-2xl bg-sky-50 text-[#2563EB] flex items-center justify-center font-mono font-black text-2xl shadow-inner">
-                    {p.name.charAt(0)}
-                  </div>
-                  <span className="absolute top-2.5 left-2.5 text-[10px] font-bold px-2 py-0.5 rounded bg-white border border-[#E2E8F0] text-slate-700 shadow-xs">
+                {/* Imagen del Producto para Ecommerce */}
+                <div className="h-44 bg-slate-50 border-b border-[#E2E8F0] flex items-center justify-center p-3 relative group-hover:scale-[1.01] transition-transform overflow-hidden">
+                  {p.imageUrl ? (
+                    <img
+                      src={p.imageUrl}
+                      alt={p.name}
+                      className="w-full h-full object-contain drop-shadow-sm group-hover:scale-105 transition-transform"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 rounded-2xl bg-sky-50 text-[#2563EB] flex items-center justify-center font-mono font-black text-2xl shadow-inner">
+                      {p.name.charAt(0)}
+                    </div>
+                  )}
+                  <span className="absolute top-2.5 left-2.5 text-[10px] font-bold px-2 py-0.5 rounded bg-white/90 backdrop-blur-xs border border-[#E2E8F0] text-slate-700 shadow-2xs">
                     {p.category || "General"}
                   </span>
                   <span
@@ -353,6 +363,17 @@ export function EcommerceStorefront({ products }: { products: StoreProduct[] }) 
                     key={item.product.id}
                     className="p-3 rounded-lg border border-slate-200 bg-white flex items-center justify-between gap-3 shadow-xs"
                   >
+                    {item.product.imageUrl ? (
+                      <img
+                        src={item.product.imageUrl}
+                        alt={item.product.name}
+                        className="w-12 h-12 object-contain rounded-md bg-slate-50 border border-slate-200 shrink-0 p-1"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-md bg-sky-50 text-[#2563EB] font-bold text-sm flex items-center justify-center shrink-0">
+                        {item.product.name.charAt(0)}
+                      </div>
+                    )}
                     <div className="min-w-0 flex-1">
                       <p className="font-bold text-xs text-slate-900 truncate">{item.product.name}</p>
                       <p className="text-[11px] font-mono text-[#0F4C81] font-bold">

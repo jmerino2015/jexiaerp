@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 
 export default async function TiendaPage() {
   const products = await prisma.product.findMany({
-    where: { isActive: true },
+    where: { isActive: true, isEcommerce: true },
     include: {
       stocks: true,
     },
@@ -19,6 +19,8 @@ export default async function TiendaPage() {
       sku: p.sku,
       name: p.name,
       category: p.category,
+      brand: p.brand,
+      imageUrl: p.imageUrl,
       salePrice: p.salePrice,
       totalStock: totalStock,
       unitCode: p.unitCode,
