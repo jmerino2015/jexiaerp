@@ -4,16 +4,34 @@ import { InventoryTabs } from "@/components/inventory/InventoryTabs";
 export const dynamic = "force-dynamic";
 
 export default async function InventarioPage() {
-  const products = await prisma.product.findMany({
-    where: { isActive: true },
-    include: {
-      stocks: true,
-      kardexMovements: {
-        orderBy: { createdAt: "desc" },
+  const [products, warehouses, rawTransfers] = await Promise.all([
+    prisma.product.findMany({
+      where: { isActive: true },
+      include: {
+        stocks: true,
+        kardexMovements: {
+          orderBy: { createdAt: "desc" },
+        },
       },
-    },
-    orderBy: { name: "asc" },
-  });
+      orderBy: { name: "asc" },
+    }),
+    prisma.warehouse.findMany({
+      where: { isActive: true },
+      orderBy: { code: "asc" },
+    }),
+    prisma.stockTransfer.findMany({
+      include: {
+        fromWarehouse: true,
+        toWarehouse: true,
+        items: {
+          include: {
+            product: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    }),
+  ]);
 
   // Estructurar datos para catálogo
   const productsForList = products.map((p) => {
@@ -68,6 +86,21 @@ export default async function InventarioPage() {
       };
     });
 
+  // Estructurar datos para Transferencias
+  const productsForTransfers = products
+    .filter((p) => !p.isService)
+    .map((p) => ({
+      id: p.id,
+      sku: p.sku,
+      name: p.name,
+      unitCode: p.unitCode,
+      avgCost: p.avgCost,
+      stocks: p.stocks.map((s) => ({
+        warehouseId: s.warehouseId,
+        quantity: s.quantity,
+      })),
+    }));
+
   return (
     <div className="space-y-6">
       <div>
@@ -75,13 +108,16 @@ export default async function InventarioPage() {
           Control de Inventario y Almacenes
         </h1>
         <p className="text-sm text-slate-500 mt-1">
-          Supervisión de stock en tiempo real, catalogación SUNAT y Kardex con costo promedio ponderado.
+          Supervisión de stock en tiempo real, traslados multi-almacén con Guía de Remisión Remitente (GRE 09) y Kardex valorizado.
         </p>
       </div>
 
       <InventoryTabs
         productsForList={productsForList}
         productsForKardex={productsForKardex}
+        transfers={rawTransfers}
+        warehouses={warehouses}
+        productsForTransfers={productsForTransfers}
       />
     </div>
   );

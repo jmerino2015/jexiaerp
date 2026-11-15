@@ -34,6 +34,15 @@ enum KardexType {
   SALIDA_VENTA
   AJUSTE_POSITIVO
   AJUSTE_NEGATIVO
+  TRANSFERENCIA_SALIDA
+  TRANSFERENCIA_ENTRADA
+}
+
+enum TransferStatus {
+  BORRADOR
+  EN_TRANSITO
+  COMPLETADA
+  ANULADA
 }
 
 enum PurchaseStatus {
@@ -45,11 +54,12 @@ enum PurchaseStatus {
 }
 
 enum SalesDocType {
-  FACTURA      // 01
-  BOLETA       // 03
-  COTIZACION   // COT
-  NOTA_CREDITO // 07
-  NOTA_DEBITO  // 08
+  FACTURA        // 01
+  BOLETA         // 03
+  COTIZACION     // COT
+  NOTA_CREDITO   // 07
+  NOTA_DEBITO    // 08
+  GUIA_REMISION  // 09 (Guía de Remisión Electrónica Remitente GRE)
 }
 
 enum SalesStatus {
@@ -140,6 +150,7 @@ model Company {
   accountPlans    AccountPlan[]
   journalEntries  JournalEntry[]
   ecommerceOrders EcommerceOrder[]
+  stockTransfers  StockTransfer[]
 }
 
 model User {
@@ -200,6 +211,8 @@ model Warehouse {
   kardexMovements KardexMovement[]
   purchaseOrders  PurchaseOrder[]
   salesDocuments  SalesDocument[]
+  transfersOrigin StockTransfer[]  @relation("TransfersOrigin")
+  transfersDest   StockTransfer[]  @relation("TransfersDest")
 
   @@unique([companyId, code])
 }
@@ -234,6 +247,7 @@ model Product {
   kardexMovements KardexMovement[]
   purchaseItems   PurchaseOrderItem[]
   salesItems      SalesDocumentItem[]
+  transferItems   StockTransferItem[]
 
   @@unique([companyId, sku])
 }
@@ -514,5 +528,66 @@ model EcommerceOrderItem {
   total            Float
 
   ecommerceOrder   EcommerceOrder @relation(fields: [ecommerceOrderId], references: [id], onDelete: Cascade)
+}
+
+model StockTransfer {
+  id                String              @id @default(uuid())
+  companyId         String
+  transferNumber    String              // Ej: TR-2025-0001
+  fromWarehouseId   String
+  toWarehouseId     String
+  status            TransferStatus      @default(COMPLETADA)
+  issueDate         DateTime            @default(now())
+
+  // Datos de la Guía de Remisión Electrónica Remitente (GRE - SUNAT 09)
+  greSeries         String?             @default("T001") // Serie oficial GRE remitente
+  greNumber         Int?
+  greFullNumber     String?             // Ej: T001-000001
+  sunatStatus       SunatStatus?        @default(ACEPTADO)
+  sunatCdrHash      String?             // Hash de validación CDR
+  transferReason    String              @default("04") // Cat. 20 SUNAT: 04 Traslado entre establecimientos
+  transferReasonDesc String?            @default("Traslado entre establecimientos de la misma empresa")
+  transportMode     String              @default("02") // Cat. 18 SUNAT: 02 Transporte privado, 01 Público
+
+  // Datos de Partida y Llegada
+  originAddress     String              // Dirección punto de partida
+  originUbigeo      String?             @default("150101")
+  destAddress       String              // Dirección punto de llegada
+  destUbigeo        String?             @default("150101")
+
+  // Datos de Transporte
+  driverDocType     String?             @default("DNI")
+  driverDocNumber   String?             // DNI conductor
+  driverName        String?             // Nombre y apellidos conductor
+  driverLicense     String?             // Licencia de conducir (ej: Q12345678)
+  vehiclePlate      String?             // Placa de rodaje (ej: ABC-123)
+  carrierRuc        String?             // RUC transportista (si es público)
+  carrierName       String?             // Razón social transportista
+
+  // Carga
+  totalWeight       Float               @default(10.0) // Peso bruto total en KGM
+  packagesCount     Int                 @default(1)    // Cantidad de bultos
+  notes             String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  company           Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  fromWarehouse     Warehouse           @relation("TransfersOrigin", fields: [fromWarehouseId], references: [id], onDelete: Restrict)
+  toWarehouse       Warehouse           @relation("TransfersDest", fields: [toWarehouseId], references: [id], onDelete: Restrict)
+  items             StockTransferItem[]
+
+  @@unique([companyId, transferNumber])
+}
+
+model StockTransferItem {
+  id              String         @id @default(uuid())
+  transferId      String
+  productId       String
+  quantity        Float
+  unitCost        Float          @default(0.0)
+  totalCost       Float          @default(0.0)
+
+  transfer        StockTransfer  @relation(fields: [transferId], references: [id], onDelete: Cascade)
+  product         Product        @relation(fields: [productId], references: [id], onDelete: Restrict)
 }
 
