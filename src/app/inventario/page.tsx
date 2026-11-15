@@ -4,7 +4,7 @@ import { InventoryTabs } from "@/components/inventory/InventoryTabs";
 export const dynamic = "force-dynamic";
 
 export default async function InventarioPage() {
-  const [products, warehouses, rawTransfers] = await Promise.all([
+  const [products, warehouses, rawTransfers, rawLots] = await Promise.all([
     prisma.product.findMany({
       where: { isActive: true },
       include: {
@@ -30,6 +30,13 @@ export default async function InventarioPage() {
         },
       },
       orderBy: { createdAt: "desc" },
+    }),
+    prisma.productLot.findMany({
+      include: {
+        product: true,
+        warehouse: true,
+      },
+      orderBy: { expirationDate: "asc" },
     }),
   ]);
 
@@ -101,6 +108,36 @@ export default async function InventarioPage() {
       })),
     }));
 
+  // Estructurar datos para Lotes
+  const lots = rawLots.map((l) => ({
+    id: l.id,
+    lotNumber: l.lotNumber,
+    productId: l.productId,
+    warehouseId: l.warehouseId,
+    initialQty: l.initialQty,
+    currentQty: l.currentQty,
+    manufactureDate: l.manufactureDate ? l.manufactureDate.toISOString() : null,
+    expirationDate: l.expirationDate ? l.expirationDate.toISOString() : null,
+    status: l.status,
+    notes: l.notes,
+    product: {
+      id: l.product.id,
+      sku: l.product.sku,
+      name: l.product.name,
+      unitCode: l.product.unitCode,
+      category: l.product.category,
+      avgCost: l.product.avgCost,
+      imageUrl: l.product.imageUrl,
+      hasExpiryDate: l.product.hasExpiryDate,
+      alertDays: l.product.alertDays,
+    },
+    warehouse: {
+      id: l.warehouse.id,
+      name: l.warehouse.name,
+      code: l.warehouse.code,
+    },
+  }));
+
   return (
     <div className="space-y-6">
       <div>
@@ -108,7 +145,7 @@ export default async function InventarioPage() {
           Control de Inventario y Almacenes
         </h1>
         <p className="text-sm text-slate-500 mt-1">
-          Supervisión de stock en tiempo real, traslados multi-almacén con Guía de Remisión Remitente (GRE 09) y Kardex valorizado.
+          Supervisión de stock en tiempo real, traslados multi-almacén con Guía de Remisión Remitente (GRE 09), lotes y Kardex valorizado.
         </p>
       </div>
 
@@ -118,6 +155,7 @@ export default async function InventarioPage() {
         transfers={rawTransfers}
         warehouses={warehouses}
         productsForTransfers={productsForTransfers}
+        lots={lots}
       />
     </div>
   );

@@ -28,6 +28,19 @@ enum IgvType {
   INAFECTO_30  // 30 - Inafecto - Operación Onerosa
 }
 
+enum TrackingType {
+  NONE
+  LOT
+  SERIAL
+}
+
+enum LotStatus {
+  DISPONIBLE
+  POR_VENCER
+  VENCIDO
+  AGOTADO
+}
+
 enum KardexType {
   INICIAL
   ENTRADA_COMPRA
@@ -151,6 +164,7 @@ model Company {
   journalEntries  JournalEntry[]
   ecommerceOrders EcommerceOrder[]
   stockTransfers  StockTransfer[]
+  productLots     ProductLot[]
 }
 
 model User {
@@ -213,6 +227,7 @@ model Warehouse {
   salesDocuments  SalesDocument[]
   transfersOrigin StockTransfer[]  @relation("TransfersOrigin")
   transfersDest   StockTransfer[]  @relation("TransfersDest")
+  productLots     ProductLot[]
 
   @@unique([companyId, code])
 }
@@ -235,6 +250,9 @@ model Product {
   sunatCode       String?          // Código de producto SUNAT Catálogo 25 (ej: 53102902)
   imageUrl        String?          // Fotografía principal del producto
   isEcommerce     Boolean          @default(true) // Habilitado para venta en tienda retail
+  trackingType    TrackingType     @default(NONE) // NONE, LOT (por lote/vencimiento), SERIAL (por serie)
+  hasExpiryDate   Boolean          @default(false) // Si maneja fecha de caducidad
+  alertDays       Int              @default(30)    // Días preventivos de alerta antes de caducar
   detractionSubject Boolean        @default(false) // Si está sujeto a detracción SPOT
   detractionCode   String?         // Catálogo 54 SUNAT
   detractionPercent Float?         // % SPOT ej 12%
@@ -248,6 +266,7 @@ model Product {
   purchaseItems   PurchaseOrderItem[]
   salesItems      SalesDocumentItem[]
   transferItems   StockTransferItem[]
+  lots            ProductLot[]
 
   @@unique([companyId, sku])
 }
@@ -279,12 +298,15 @@ model KardexMovement {
   balanceQty      Float       // Stock resultante acumulado
   balanceUnitCost Float       // Nuevo costo promedio ponderado acumulado
   balanceTotal    Float       // Valorización total del inventario
+  lotId           String?
+  lotNumber       String?
   notes           String?
   createdAt       DateTime    @default(now())
 
   company         Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
   product         Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
   warehouse       Warehouse   @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+  lot             ProductLot? @relation(fields: [lotId], references: [id], onDelete: SetNull)
 }
 
 model DocumentSeries {
@@ -343,6 +365,8 @@ model PurchaseOrderItem {
   subtotal        Float
   igv             Float
   total           Float
+  lotNumber       String?
+  expirationDate  DateTime?
 
   purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
   product         Product       @relation(fields: [productId], references: [id], onDelete: Restrict)
@@ -417,6 +441,8 @@ model SalesDocumentItem {
   subtotal        Float
   igvAmount       Float
   totalAmount     Float
+  lotId           String?
+  lotNumber       String?
 
   salesDocument   SalesDocument @relation(fields: [salesDocumentId], references: [id], onDelete: Cascade)
   product         Product       @relation(fields: [productId], references: [id], onDelete: Restrict)
@@ -586,8 +612,33 @@ model StockTransferItem {
   quantity        Float
   unitCost        Float          @default(0.0)
   totalCost       Float          @default(0.0)
+  lotId           String?
+  lotNumber       String?
 
   transfer        StockTransfer  @relation(fields: [transferId], references: [id], onDelete: Cascade)
   product         Product        @relation(fields: [productId], references: [id], onDelete: Restrict)
+}
+
+model ProductLot {
+  id              String           @id @default(uuid())
+  companyId       String
+  productId       String
+  warehouseId     String
+  lotNumber       String           // Número o código de lote (ej: LOT-2025-08A)
+  manufactureDate DateTime?        // Fecha de fabricación
+  expirationDate  DateTime?        // Fecha de vencimiento
+  initialQty      Float            @default(0.0)
+  currentQty      Float            @default(0.0)
+  status          LotStatus        @default(DISPONIBLE)
+  notes           String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  company         Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  product         Product          @relation(fields: [productId], references: [id], onDelete: Cascade)
+  warehouse       Warehouse        @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+  kardexMovements KardexMovement[]
+
+  @@unique([companyId, productId, warehouseId, lotNumber])
 }
 
