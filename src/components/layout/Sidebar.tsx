@@ -16,6 +16,7 @@ import {
   ShoppingBag,
   PanelLeftClose,
   X,
+  CreditCard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { JexiaLogo } from "@/components/JexiaLogo";
@@ -60,6 +61,13 @@ const navItems: NavItem[] = [
     icon: Boxes,
     badge: "Kardex",
     badgeColor: "bg-sky-500/20 text-sky-300 border-sky-500/30",
+  },
+  {
+    title: "Cobranzas & Pagos",
+    href: "/finanzas",
+    icon: CreditCard,
+    badge: "CXC/CXP",
+    badgeColor: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
   },
   {
     title: "Clientes",

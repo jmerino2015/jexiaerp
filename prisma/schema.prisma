@@ -95,6 +95,12 @@ enum PaymentMethod {
   YAPE_PLIN
   TARJETA
   CREDITO
+  DEPOSITO_CUENTA
+}
+
+enum PaymentType {
+  COBRO_VENTA
+  PAGO_COMPRA
 }
 
 enum PaymentStatus {
@@ -165,6 +171,8 @@ model Company {
   ecommerceOrders EcommerceOrder[]
   stockTransfers  StockTransfer[]
   productLots     ProductLot[]
+  paymentSchedules PaymentSchedule[]
+  paymentRecords   PaymentRecord[]
 }
 
 model User {
@@ -205,6 +213,7 @@ model Partner {
   company      Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
   salesDocs    SalesDocument[]
   purchaseOrders PurchaseOrder[]
+  paymentRecords PaymentRecord[]
 
   @@unique([companyId, docNumber])
 }
@@ -337,6 +346,11 @@ model PurchaseOrder {
   issueDate       DateTime        @default(now())
   expectedDate    DateTime?
   status          PurchaseStatus  @default(BORRADOR)
+  paymentStatus   PaymentStatus   @default(PENDIENTE)
+  paymentCondition String         @default("CONTADO") // CONTADO, CREDITO_15, CREDITO_30, etc.
+  paidAmount      Float           @default(0.0)
+  balanceAmount   Float           @default(0.0)
+  dueDate         DateTime?
   supplierInvoice String?         // Ej: Factura F001-8942 entregada por el proveedor
   subtotal        Float           @default(0.0)
   igv             Float           @default(0.0)
@@ -351,6 +365,8 @@ model PurchaseOrder {
   supplier        Partner         @relation(fields: [supplierId], references: [id], onDelete: Restrict)
   createdByUser   User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
   items           PurchaseOrderItem[]
+  schedules       PaymentSchedule[]
+  paymentRecords  PaymentRecord[]
 
   @@unique([companyId, fullNumber])
 }
@@ -401,6 +417,10 @@ model SalesDocument {
   cdrXmlContent     String?            @db.Text // Archivo CDR XML oficial firmado
   paymentMethod     PaymentMethod      @default(EFECTIVO)
   paymentStatus     PaymentStatus      @default(PAGADO)
+  paymentCondition  String             @default("CONTADO") // CONTADO, CREDITO_15, CREDITO_30, etc.
+  paidAmount        Float              @default(0.0)
+  balanceAmount     Float              @default(0.0)
+  creditDueDate     DateTime?
   notes             String?
   convertedToDocId  String?            // Referencia si esta cotización se convirtió en Factura/Boleta
 
@@ -424,6 +444,8 @@ model SalesDocument {
   customer          Partner            @relation(fields: [customerId], references: [id], onDelete: Restrict)
   seller            User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
   items             SalesDocumentItem[]
+  schedules         PaymentSchedule[]
+  paymentRecords    PaymentRecord[]
 
   @@unique([companyId, fullNumber])
 }
@@ -640,5 +662,55 @@ model ProductLot {
   kardexMovements KardexMovement[]
 
   @@unique([companyId, productId, warehouseId, lotNumber])
+}
+
+// ==============================================================================
+// MÓDULO DE COBRANZAS, PAGOS Y GESTIÓN DE CRÉDITO (CUENTAS POR COBRAR Y PAGAR)
+// ==============================================================================
+
+model PaymentSchedule {
+  id                String         @id @default(uuid())
+  companyId         String
+  salesDocumentId   String?
+  purchaseOrderId   String?
+  installmentNumber Int            @default(1) // Cuota 1, Cuota 2...
+  dueDate           DateTime       // Fecha de vencimiento pactada
+  amount            Float          // Monto pactado de la cuota
+  paidAmount        Float          @default(0.0) // Monto pagado / amortizado
+  balance           Float          // Saldo pendiente (amount - paidAmount)
+  status            PaymentStatus  @default(PENDIENTE) // PENDIENTE, PARCIAL, PAGADO
+  notes             String?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  company           Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  salesDocument     SalesDocument? @relation(fields: [salesDocumentId], references: [id], onDelete: Cascade)
+  purchaseOrder     PurchaseOrder? @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  payments          PaymentRecord[]
+}
+
+model PaymentRecord {
+  id                String           @id @default(uuid())
+  companyId         String
+  paymentType       PaymentType      // COBRO_VENTA, PAGO_COMPRA
+  salesDocumentId   String?
+  purchaseOrderId   String?
+  paymentScheduleId String?
+  partnerId         String           // Cliente o Proveedor
+  amount            Float            // Importe amortizado
+  paymentDate       DateTime         @default(now())
+  paymentMethod     PaymentMethod    @default(TRANSFERENCIA)
+  bankName          String?          // "BCP", "BBVA", "Interbank", "Banco de la Nación", "Caja Huancayo", "Caja Efectivo"
+  operationNumber   String?          // N° de operación bancaria, voucher o recibo
+  notes             String?
+  journalEntryId    String?          // Asiento contable generado en PCGE (1041 vs 1212 o 4212 vs 1041)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  company           Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  salesDocument     SalesDocument?   @relation(fields: [salesDocumentId], references: [id], onDelete: SetNull)
+  purchaseOrder     PurchaseOrder?   @relation(fields: [purchaseOrderId], references: [id], onDelete: SetNull)
+  paymentSchedule   PaymentSchedule? @relation(fields: [paymentScheduleId], references: [id], onDelete: SetNull)
+  partner           Partner          @relation(fields: [partnerId], references: [id], onDelete: Restrict)
 }
 
