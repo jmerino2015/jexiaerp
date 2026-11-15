@@ -9,27 +9,26 @@ from docx.oxml.ns import qn, nsdecls
 def create_document():
     doc = docx.Document()
 
-    # 1. Configuración de Márgenes (Estándar Ejecutivo: 2.5 cm en todos los lados = 0.98 pulgadas)
+    # 1. Configuración de Márgenes y Páginas (Estándar Ejecutivo A4 / Carta: 2.5 cm en todos los márgenes)
     for section in doc.sections:
-        section.top_margin = Inches(0.9)
-        section.bottom_margin = Inches(0.9)
-        section.left_margin = Inches(0.9)
-        section.right_margin = Inches(0.9)
+        section.top_margin = Inches(0.85)
+        section.bottom_margin = Inches(0.85)
+        section.left_margin = Inches(0.85)
+        section.right_margin = Inches(0.85)
         section.page_width = Inches(8.5)
         section.page_height = Inches(11.0)
-        # Encabezado y pie de página diferentes para la portada
         section.different_first_page_header_footer = True
 
-        # Configurar Encabezado de páginas siguientes
+        # Encabezado (páginas siguientes a portada)
         header = section.header
         hp = header.paragraphs[0]
         hp.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-        hrun = hp.add_run("JEXIA ERP v2.0 — Manual de Uso y Documento de Alcance del Sistema")
+        hrun = hp.add_run("JEXIA ERP v2.0 — Manual de Operaciones y Alcance Funcional")
         hrun.font.name = "Segoe UI"
         hrun.font.size = Pt(8.5)
         hrun.font.color.rgb = RGBColor(100, 116, 139) # slate-500
 
-        # Configurar Pie de página
+        # Pie de página
         footer = section.footer
         fp = footer.paragraphs[0]
         fp.alignment = WD_ALIGN_PARAGRAPH.RIGHT
@@ -38,7 +37,7 @@ def create_document():
         frun.font.size = Pt(8.5)
         frun.font.color.rgb = RGBColor(100, 116, 139)
 
-    # Colores Corporativos Jexia
+    # Colores de la Solución Jexia
     COLOR_PRIMARY = RGBColor(15, 23, 42)    # #0F172A Slate 900
     COLOR_BLUE = RGBColor(37, 99, 235)      # #2563EB Blue 600
     COLOR_GREEN = RGBColor(16, 185, 129)    # #10B981 Emerald 500
@@ -68,7 +67,6 @@ def create_document():
         set_cell_background(cell, bg_color)
         set_cell_margins(cell, top=140, bottom=140, left=200, right=200)
 
-        # Borde izquierdo grueso
         tcPr = cell._tc.get_or_add_tcPr()
         borders = parse_xml(f'<w:tcBorders {nsdecls("w")}><w:left w:val="single" w:sz="36" w:space="0" w:color="{border_color}"/><w:top w:val="none"/><w:right w:val="none"/><w:bottom w:val="none"/></w:tcBorders>')
         tcPr.append(borders)
@@ -90,7 +88,7 @@ def create_document():
 
     def style_heading_1(text):
         p = doc.add_paragraph()
-        p.paragraph_format.space_before = Pt(18)
+        p.paragraph_format.space_before = Pt(20)
         p.paragraph_format.space_after = Pt(6)
         p.paragraph_format.keep_with_next = True
         run = p.add_run(text)
@@ -102,7 +100,7 @@ def create_document():
 
     def style_heading_2(text):
         p = doc.add_paragraph()
-        p.paragraph_format.space_before = Pt(12)
+        p.paragraph_format.space_before = Pt(14)
         p.paragraph_format.space_after = Pt(4)
         p.paragraph_format.keep_with_next = True
         run = p.add_run(text)
@@ -114,8 +112,8 @@ def create_document():
 
     def style_heading_3(text):
         p = doc.add_paragraph()
-        p.paragraph_format.space_before = Pt(8)
-        p.paragraph_format.space_after = Pt(2)
+        p.paragraph_format.space_before = Pt(9)
+        p.paragraph_format.space_after = Pt(3)
         p.paragraph_format.keep_with_next = True
         run = p.add_run(text)
         run.bold = True
@@ -132,11 +130,11 @@ def create_document():
             rb = p.add_run(bold_prefix)
             rb.bold = True
             rb.font.name = "Segoe UI"
-            rb.font.size = Pt(10)
+            rb.font.size = Pt(9.5)
             rb.font.color.rgb = COLOR_DARK
         r = p.add_run(text)
         r.font.name = "Segoe UI"
-        r.font.size = Pt(10)
+        r.font.size = Pt(9.5)
         r.font.color.rgb = COLOR_DARK
         return p
 
@@ -156,52 +154,81 @@ def create_document():
         r.font.color.rgb = COLOR_DARK
         return p
 
+    def add_screenshot(img_rel_path, caption):
+        img_path = os.path.abspath(img_rel_path)
+        if os.path.exists(img_path):
+            tbl = doc.add_table(rows=1, cols=1)
+            tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
+            cell = tbl.cell(0, 0)
+            set_cell_background(cell, "FFFFFF")
+            set_cell_margins(cell, top=80, bottom=80, left=80, right=80)
+            # Borde sutil alrededor de la captura
+            tcPr = cell._tc.get_or_add_tcPr()
+            borders = parse_xml(f'<w:tcBorders {nsdecls("w")}><w:left w:val="single" w:sz="8" w:space="0" w:color="CBD5E1"/><w:top w:val="single" w:sz="8" w:space="0" w:color="CBD5E1"/><w:right w:val="single" w:sz="8" w:space="0" w:color="CBD5E1"/><w:bottom w:val="single" w:sz="8" w:space="0" w:color="CBD5E1"/></w:tcBorders>')
+            tcPr.append(borders)
+
+            cp = cell.paragraphs[0]
+            cp.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            cp.paragraph_format.space_before = Pt(4)
+            cp.paragraph_format.space_after = Pt(4)
+            cp.add_run().add_picture(img_path, width=Inches(6.4))
+
+            p_cap = doc.add_paragraph()
+            p_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            p_cap.paragraph_format.space_before = Pt(3)
+            p_cap.paragraph_format.space_after = Pt(12)
+            r_cap = p_cap.add_run(f"Figura: {caption}")
+            r_cap.font.name = "Segoe UI"
+            r_cap.font.size = Pt(8.5)
+            r_cap.font.italic = True
+            r_cap.font.color.rgb = COLOR_MUTED
+
     # =========================================================================
-    # PORTADA CORPORATIVA
+    # 1. PORTADA CORPORATIVA
     # =========================================================================
     logo_path = os.path.abspath("public/jexia_logo_word.png")
     if os.path.exists(logo_path):
         p_logo = doc.add_paragraph()
         p_logo.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        p_logo.paragraph_format.space_before = Pt(36)
-        p_logo.paragraph_format.space_after = Pt(28)
-        p_logo.add_run().add_picture(logo_path, width=Inches(3.4))
+        p_logo.paragraph_format.space_before = Pt(30)
+        p_logo.paragraph_format.space_after = Pt(20)
+        p_logo.add_run().add_picture(logo_path, width=Inches(3.3))
 
     p_title = doc.add_paragraph()
     p_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    p_title.paragraph_format.space_before = Pt(12)
-    p_title.paragraph_format.space_after = Pt(6)
+    p_title.paragraph_format.space_before = Pt(8)
+    p_title.paragraph_format.space_after = Pt(4)
     r_main_title = p_title.add_run("JEXIA ERP — EDICIÓN EMPRESARIAL")
     r_main_title.bold = True
     r_main_title.font.name = "Segoe UI"
-    r_main_title.font.size = Pt(24)
+    r_main_title.font.size = Pt(23)
     r_main_title.font.color.rgb = COLOR_PRIMARY
 
     p_subtitle = doc.add_paragraph()
     p_subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    p_subtitle.paragraph_format.space_after = Pt(24)
-    r_sub = p_subtitle.add_run("MANUAL DE OPERACIONES Y DOCUMENTO DE ALCANCE FUNCIONAL DEL SISTEMA\nCumplimiento Normativo SUNAT UBL 2.1, GRE 09, SPOT y PCGE 2019")
+    p_subtitle.paragraph_format.space_after = Pt(20)
+    r_sub = p_subtitle.add_run("MANUAL DE OPERACIONES Y DOCUMENTO DE ALCANCE FUNCIONAL DEL SISTEMA\nEstructurado bajo los Estándares de Documentación Odoo 19 y Defontana ERP\nCumplimiento Normativo SUNAT UBL 2.1, GRE 09, SPOT y PCGE 2019")
     r_sub.font.name = "Segoe UI"
-    r_sub.font.size = Pt(12)
+    r_sub.font.size = Pt(11)
     r_sub.font.color.rgb = COLOR_MUTED
 
     # Línea decorativa
     p_line = doc.add_paragraph()
     p_line.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    p_line.paragraph_format.space_after = Pt(40)
-    r_line = p_line.add_run("—" * 35)
+    p_line.paragraph_format.space_after = Pt(28)
+    r_line = p_line.add_run("—" * 38)
     r_line.font.color.rgb = COLOR_BLUE
 
     # Cuadro de Metadatos de la Portada
     tbl_meta = doc.add_table(rows=6, cols=2)
     tbl_meta.alignment = WD_TABLE_ALIGNMENT.CENTER
     meta_data = [
-        ("Versión del Sistema:", "2.0 (Edición Empresarial Producción)"),
-        ("Propósito y Lema:", "Claridad operativa para crecer sin límites"),
-        ("Ámbito de Aplicación:", "MYPES y PYMES Comerciales, Industriales y de Servicios (Perú)"),
+        ("Versión del Software:", "Jexia ERP v2.0 (Edición Empresarial Producción)"),
+        ("Lema y Filosofía:", "Claridad operativa para crecer sin límites"),
+        ("Público Objetivo:", "MYPES y PYMES de Retail, Comercio, Manufactura Textil y Servicios (Perú)"),
         ("Fecha de Publicación:", "Noviembre 2026"),
-        ("Clasificación del Documento:", "Manual Maestro y Especificación de Requisitos de Software (SRS)"),
-        ("Estado de Implementación:", "100% Desarrollado, Verificado y en Ejecución"),
+        ("Nivel de Documentación:", "Manual Técnico-Funcional Detallado Paso a Paso (Odoo / Defontana Style)"),
+        ("Conformidad Tributaria:", "SUNAT Facturación Electrónica UBL 2.1, GRE 09, SIRE y PLE 5.1"),
     ]
     for i, (k, v) in enumerate(meta_data):
         c0 = tbl_meta.cell(i, 0)
@@ -210,23 +237,23 @@ def create_document():
         c1.width = Inches(4.3)
         set_cell_background(c0, "F8FAFC")
         set_cell_background(c1, "FFFFFF")
-        set_cell_margins(c0, 70, 70, 100, 100)
-        set_cell_margins(c1, 70, 70, 100, 100)
+        set_cell_margins(c0, 60, 60, 90, 90)
+        set_cell_margins(c1, 60, 60, 90, 90)
         p0 = c0.paragraphs[0]
         p0.add_run(k).bold = True
         p0.runs[0].font.name = "Segoe UI"
-        p0.runs[0].font.size = Pt(9.5)
+        p0.runs[0].font.size = Pt(9)
         p0.runs[0].font.color.rgb = COLOR_DARK
         p1 = c1.paragraphs[0]
         p1.add_run(v)
         p1.runs[0].font.name = "Segoe UI"
-        p1.runs[0].font.size = Pt(9.5)
+        p1.runs[0].font.size = Pt(9)
         p1.runs[0].font.color.rgb = COLOR_DARK
 
     doc.add_page_break()
 
     # =========================================================================
-    # CONTROL DE VERSIONES Y FIRMAS
+    # 2. CONTROL DE VERSIONES Y APROBACIONES
     # =========================================================================
     style_heading_2("CONTROL DE VERSIONES Y APROBACIONES DEL DOCUMENTO")
     tbl_rev = doc.add_table(rows=3, cols=4)
@@ -245,7 +272,7 @@ def create_document():
 
     rev_rows = [
         ("1.0", "14/11/2026", "Equipo de Arquitectura Jexia", "Diseño inicial, Core ERP, Facturación SUNAT UBL 2.1 y Kardex 13.1"),
-        ("2.0", "15/11/2026", "Equipo de Desarrollo Jexia", "Integración de Transferencias Multi-Almacén GRE 09, Lotes FEFO y Cobranzas PCGE")
+        ("2.0", "15/11/2026", "Equipo de Desarrollo Jexia", "Transferencias Multi-Almacén GRE 09, Lotes FEFO, Cobranzas PCGE y Screenshots")
     ]
     for i, row in enumerate(rev_rows, start=1):
         for j, val in enumerate(row):
@@ -259,31 +286,43 @@ def create_document():
             r.font.size = Pt(8.5)
             r.font.color.rgb = COLOR_DARK
 
-    doc.add_paragraph().paragraph_format.space_after = Pt(12)
+    doc.add_paragraph().paragraph_format.space_after = Pt(10)
 
     # =========================================================================
-    # PARTE I: DOCUMENTO DE ALCANCE DEL SISTEMA (SRS)
+    # 3. PANTALLA PRINCIPAL DEL SISTEMA (PRINT DE PANTALLA DE INICIO)
     # =========================================================================
-    style_heading_1("PARTE I: DOCUMENTO DE ALCANCE DEL SISTEMA (PROJECT SCOPE)")
-    
-    add_p("Jexia ERP es una solución SaaS empresarial de alto rendimiento diseñada específicamente para el ecosistema productivo y tributario peruano. El presente alcance formaliza las capacidades de software que integran el ciclo operativo completo: comercialización, facturación electrónica, logística multi-almacén, tesorería y contabilidad general.")
+    style_heading_1("INTERFAZ GRÁFICA Y PANTALLA DE INICIO DEL SISTEMA")
+    add_p("A continuación se presenta la captura real del Dashboard Ejecutivo de Jexia ERP (/inicio). Esta pantalla centraliza en una sola vista los indicadores vitales de la empresa, alertas de stock mínimo, gráfico de ventas y comprobantes emitidos en tiempo real.")
+
+    add_screenshot("public/screenshots/dashboard_inicio.png", "Pantalla de Inicio de Jexia ERP — Dashboard Ejecutivo con KPIs en Tiempo Real, Alertas de Stock Crítico y Menú Lateral Plegable con Logotipo Oficial.")
 
     add_callout(
-        "El sistema opera bajo una estricta transaccionalidad ACID en PostgreSQL 17 con micro-transacciones atómicas gestionadas por Prisma ORM. Ninguna venta, compra o traslado puede generar desbalances entre el stock físico, el valor monetario del Kardex y las cuentas del Plan Contable General Empresarial (PCGE 2019).",
-        "PRINCIPIO FUNDAMENTAL DE DISEÑO",
+        "La interfaz ha sido diseñada para optimizar la toma de decisiones: en la parte superior se observa el logotipo corporativo tricolor con el lema empresarial, el botón de colapso de menú para maximizar el área de trabajo, y cuatro tarjetas inteligentes de métricas financieras y operativas.",
+        "DISEÑO EJECUTIVO",
         "info"
     )
 
-    style_heading_2("1. Objetivos Estratégicos del Producto")
-    add_bullet(" Reducción a Cero del Riesgo Tributario: Emisión automática y nativa de Facturas (01), Boletas (03), Notas de Crédito (07) y Guías de Remisión Remitente (09) conforme a UBL 2.1.", "Cumplimiento SUNAT: ")
-    add_bullet(" Costeo continuo ponderado móvil de inventarios en cumplimiento con el Formato SUNAT 13.1 y trazabilidad FEFO para productos con fecha de expiración.", "Kardex Valorizado Exacto: ")
-    add_bullet(" Control riguroso de facturas a crédito con cronograma de cuotas, seguimiento de morosidad y conciliación bancaria con generación instantánea de asientos contables.", "Salud Financiera & Liquidez: ")
-    add_bullet(" Venta directa omnicanal al consumidor final sincronizada con el stock real para evitar sobreventas.", "E-commerce Retail Integrado: ")
+    doc.add_page_break()
 
-    style_heading_2("2. Estructura de Desglose del Trabajo (WBS / Paquetes Funcionales)")
+    # =========================================================================
+    # 4. PARTE I: ALCANCE INTEGRAL DEL SISTEMA (SRS)
+    # =========================================================================
+    style_heading_1("PARTE I: DOCUMENTO DE ALCANCE DEL SISTEMA (PROJECT SCOPE / SRS)")
+    
+    add_p("El objetivo del sistema Jexia ERP es erradicar el descontrol operativo y tributario en las empresas peruanas mediante una arquitectura transaccional de micro-acciones ACID construida sobre Next.js 15, PostgreSQL 17 y Prisma ORM.")
+
+    style_heading_2("1. Arquitectura de Integración de Procesos (End-to-End)")
+    add_p("Inspirado en la ingeniería de flujos de Odoo 19 y Defontana ERP, Jexia ERP conecta de forma indivisible los siguientes eslabones:")
+    add_bullet(" Al recibir una orden o vender en POS, el sistema reserva o descuenta existencias en el almacén físico seleccionado.", "Inventario en Tiempo Real: ")
+    add_bullet(" Toda entrada o salida actualiza el costo ponderado del producto y genera el registro en el Formato SUNAT 13.1.", "Kardex Permanente: ")
+    add_bullet(" Generación de XML UBL 2.1 con firma digital, hash SHA-256 y Constancia de Recepción (CDR) oficial.", "Facturación Electrónica: ")
+    add_bullet(" Si la operación es a crédito, se programan cuotas con fecha de vencimiento conforme a la Res. SUNAT 193-2020.", "Cuentas por Cobrar/Pagar: ")
+    add_bullet(" En el mismo milisegundo en que se crea el comprobante o se concilia un cobro, se genera el asiento de partida doble en el Libro Diario.", "Contabilidad Oficial PCGE: ")
+
+    style_heading_2("2. Estructura de Desglose del Trabajo (WBS / EDT)")
     tbl_wbs = doc.add_table(rows=9, cols=3)
     tbl_wbs.alignment = WD_TABLE_ALIGNMENT.CENTER
-    wbs_headers = ["Módulo / EDT", "Funcionalidades Principales", "Normativa / Estándar"]
+    wbs_headers = ["Paquete EDT", "Módulos y Capacidades del Sistema", "Base Normativa"]
     for j, h in enumerate(wbs_headers):
         cell = tbl_wbs.cell(0, j)
         set_cell_background(cell, "1E3A5F")
@@ -296,14 +335,14 @@ def create_document():
         r.font.color.rgb = RGBColor(255, 255, 255)
 
     wbs_data = [
-        ("EDT 01: Identidad & UX", "Logotipo tricolor SVG, Sidebar colapsable, tema neutro slate con acentos funcionales.", "Guía de Estilo Jexia"),
-        ("EDT 02: Ventas & SUNAT", "POS interactivo, Factura 01, Boleta 03, Notas de Crédito 07, Detracciones SPOT, A4 y Ticket 80mm.", "SUNAT UBL 2.1 / D.L. 940"),
-        ("EDT 03: E-commerce Retail", "Catálogo B2C, carrito, checkout, recojo en tienda / delivery, reserva de stock.", "Venta Omnicanal B2C"),
-        ("EDT 04: Compras", "Órdenes de Compra (OC01), recepción de mercadería, cálculo de costo promedio ponderado.", "Abastecimiento y Costos"),
-        ("EDT 05: Inventario & Logística", "Kardex 13.1, Lotes y FEFO (ProductLot), Transferencias Multi-Almacén y GRE 09.", "SUNAT Res. 123-2022 / Res. 234-2006"),
+        ("EDT 01: Identidad & UX", "Logotipo tricolor SVG, Sidebar colapsable animado, semáforo visual de colores.", "Guía de Estilo Jexia"),
+        ("EDT 02: Ventas & Facturación", "POS, Facturas 01, Boletas 03, Cotizaciones, Notas de Crédito 07, Detracciones SPOT, A4 y Ticket.", "SUNAT UBL 2.1 / D.L. 940"),
+        ("EDT 03: E-commerce Retail", "Catálogo B2C online, carrito, checkout delivery/pickup, pasarelas de pago y facturación.", "Comercio Electrónico"),
+        ("EDT 04: Compras & Costos", "Órdenes de Compra (OC01), recepción de mercadería, cálculo automático de costo promedio.", "Abastecimiento"),
+        ("EDT 05: Inventario & Logística", "Kardex 13.1, Lotes y FEFO (ProductLot), Transferencias Multi-Almacén y GRE 09.", "SUNAT Res. 123-2022"),
         ("EDT 06: Cobranzas & Pagos", "Cuentas por cobrar (1212), cuentas por pagar (4212), cuotas a crédito, conciliación bancaria.", "SUNAT Res. 193-2020 / PCGE"),
-        ("EDT 07: Contabilidad General", "Plan de Cuentas a 5 dígitos, Libro Diario automático, exportación SIRE (RVIE/RCE) y PLE 5.1.", "PCGE 2019 / MEF"),
-        ("EDT 08: Analítica & Reportes", "Márgenes brutos, reportes de cartera vencida, rotación de existencias y ranking de ventas.", "Business Intelligence")
+        ("EDT 07: Contabilidad General", "Plan contable a 5 dígitos, Libro Diario automático, exportación SIRE (RVIE/RCE) y PLE 5.1.", "PCGE 2019 / MEF"),
+        ("EDT 08: Analítica & KPIs", "Márgenes brutos, envejecimiento de cartera, rotación de existencias y ranking de productos.", "Gestión Gerencial")
     ]
     for i, row in enumerate(wbs_data, start=1):
         for j, val in enumerate(row):
@@ -320,106 +359,232 @@ def create_document():
     doc.add_page_break()
 
     # =========================================================================
-    # PARTE II: MANUAL DE OPERACIONES PASO A PASO
+    # 5. PARTE II: MANUAL DETALLADO DE OPERACIONES (ODOO / DEFONTANA STYLE)
     # =========================================================================
-    style_heading_1("PARTE II: MANUAL DE USO Y OPERACIONES PASO A PASO")
+    style_heading_1("PARTE II: MANUAL DE OPERACIONES Y FUNCIONALIDADES DETALLADAS")
+    add_p("La presente sección documenta cada proceso bajo la estructura técnica de los manuales de referencia mundial (Odoo y Defontana), desglosando objetivo, prerrequisitos, campos del formulario, reglas de negocio, impacto contable y kardex.")
 
-    # MÓDULO 1: VENTAS Y FACTURACIÓN
-    style_heading_2("Módulo 1: Ventas y Facturación Electrónica SUNAT UBL 2.1")
-    add_p("El módulo de Ventas (/ventas) constituye el núcleo comercial del sistema. Permite operar un Punto de Venta (POS) rápido, emitir comprobantes autorizados y consultar el estado de validación ante SUNAT.")
+    # -------------------------------------------------------------------------
+    # PROCESO 1: VENTAS Y FACTURACIÓN ELECTRÓNICA
+    # -------------------------------------------------------------------------
+    style_heading_2("Proceso 1: Emisión de Facturas y Boletas Electrónicas (UBL 2.1)")
+    add_p("1.1 Objetivo del Proceso: ", "A. ")
+    add_p("Emitir comprobantes de pago electrónicos con plena validez tributaria ante SUNAT, formalizando la transferencia de bienes o prestación de servicios, garantizando el descuento físico de stock y la contabilización automática del ingreso y el débito fiscal.")
 
-    style_heading_3("1.1 Emisión de Boletas (03) y Facturas (01) de Contado:")
-    add_bullet(" Ingrese al módulo Ventas y haga clic en la pestaña 'Punto de Venta (POS)'.", "Paso 1: ")
-    add_bullet(" Elija 'BOLETA' (para consumidor final) o 'FACTURA' (para clientes corporativos con RUC 11 dígitos).", "Paso 2: ")
-    add_bullet(" Busque el cliente en la lista o digite su RUC/DNI.", "Paso 3: ")
-    add_bullet(" Añada los productos requeridos indicando cantidad y precio de venta acordado.", "Paso 4: ")
-    add_bullet(" Seleccione el medio de pago: Efectivo, Transferencia, Yape/Plin o Tarjeta.", "Paso 5: ")
-    add_bullet(" Presione 'Emitir Comprobante Electrónico'. El sistema ejecutará simultáneamente:", "Paso 6: ")
-    add_bullet("Asignación de serie y correlativo correlativo atómico (ej: B001-000035 o F001-000020).")
-    add_bullet("Descuento físico del stock en el almacén por defecto.")
-    add_bullet("Asiento de salida en el Kardex valorizado ponderado.")
-    add_bullet("Generación del XML UBL 2.1 con código hash SHA-256 y CDR simulado oficial.")
-    add_bullet("Asiento contable automático de venta y costo de ventas en el Libro Diario.")
+    add_p("1.2 Prerrequisitos de Operación: ", "B. ")
+    add_bullet("Cliente registrado en el sistema con RUC (11 dígitos para Facturas) o DNI (8 dígitos para Boletas).")
+    add_bullet("Productos dados de alta en el Catálogo con precio de venta y stock disponible en el almacén emisor.")
+    add_bullet("Serie correlativa autorizada configurada (F001 para Facturas, B001 para Boletas).")
 
-    style_heading_3("1.2 Emisión de Facturas al Crédito (Normativa SUNAT Res. 193-2020):")
-    add_p("Cuando se vende a crédito, la SUNAT exige consignar las fechas de vencimiento y los importes de cada cuota:")
-    add_bullet("En el POS, seleccione 'Medio de Pago: CREDITO'.")
-    add_bullet("Indique la condición pactada: 'CREDITO_15', 'CREDITO_30', 'CREDITO_45' o 'CREDITO_60'.")
-    add_bullet("Al emitir, el comprobante se creará en estado PENDIENTE en Cuentas por Cobrar (/finanzas), habilitando su cobranza por partes.")
+    add_p("1.3 Descripción Detallada de Campos del Formulario de Venta (POS): ", "C. ")
+    tbl_pos_fields = doc.add_table(rows=7, cols=4)
+    tbl_pos_fields.alignment = WD_TABLE_ALIGNMENT.CENTER
+    pos_f_headers = ["Campo", "Tipo / Formato", "Obligatorio", "Descripción y Regla de Negocio"]
+    for j, h in enumerate(pos_f_headers):
+        cell = tbl_pos_fields.cell(0, j)
+        set_cell_background(cell, "0F172A")
+        set_cell_margins(cell, 70, 70, 90, 90)
+        p = cell.paragraphs[0]
+        r = p.add_run(h)
+        r.bold = True
+        r.font.name = "Segoe UI"
+        r.font.size = Pt(8.5)
+        r.font.color.rgb = RGBColor(255, 255, 255)
 
-    style_heading_3("1.3 Régimen de Detracciones SPOT (Banco de la Nación):")
-    add_p("Para servicios o ventas de bienes afectos al sistema SPOT con montos mayores a S/ 700.00:")
-    add_bullet("Marque la casilla 'Sujeto a Detracción SPOT (Banco de la Nación)'.")
-    add_bullet("Seleccione el código del Catálogo 54 de SUNAT (ej: 022 Otros servicios empresariales) y el porcentaje (10% o 12%).")
-    add_bullet("El sistema calculará el monto neto de detracción y el saldo a cobrar, consignando la cuenta oficial del Banco de la Nación en el comprobante y en el XML.")
+    pos_fields = [
+        ("Tipo de Documento", "Selector (BOLETA / FACTURA / NOTA_CREDITO / COTIZACION)", "Sí", "Define el código SUNAT (03, 01, 07 o COT) y la serie correlativa a utilizar."),
+        ("Cliente", "Buscador con autocompletado", "Sí", "Asocia el documento al receptor. Si es Factura, valida que el RUC sea válido."),
+        ("Líneas de Producto", "Selector de Ítems", "Sí", "Permite ingresar múltiples productos. Valida existencia de stock en almacén."),
+        ("Cantidad", "Numérico (mayor a 0)", "Sí", "Número de unidades a despachar. Genera el decremento en el almacén físico."),
+        ("Precio Unitario", "Moneda (S/ PEN)", "Sí", "Precio de venta pactado. Incluye IGV del 18% para cálculo inverso o directo."),
+        ("Medio de Pago", "Selector (EFECTIVO / TRANSFERENCIA / YAPE / CREDITO)", "Sí", "Si se elige CREDITO, habilita condición a plazos (15, 30, 45, 60 días).")
+    ]
+    for i, row in enumerate(pos_fields, start=1):
+        for j, val in enumerate(row):
+            cell = tbl_pos_fields.cell(i, j)
+            bg = "F8FAFC" if i % 2 == 1 else "FFFFFF"
+            set_cell_background(cell, bg)
+            set_cell_margins(cell, 50, 50, 80, 80)
+            p = cell.paragraphs[0]
+            r = p.add_run(val)
+            r.font.name = "Segoe UI"
+            r.font.size = Pt(8)
+            r.font.color.rgb = COLOR_DARK
 
-    style_heading_3("1.4 Impresión en Formato A4, Ticket Térmico y Descarga de XML/CDR:")
-    add_p("En la tabla de comprobantes emitidos, haga clic en el ícono del ojo para abrir el Visor Oficial de Comprobantes:")
-    add_bullet("Conmutador A4 / Ticket: Permite alternar la vista entre una hoja membretada A4 y un ticket térmico de 80mm.")
-    add_bullet("Código QR Tributario: Generado dinámicamente con la estructura oficial exigida por SUNAT.")
-    add_bullet("Descarga de Archivos: Botón 'Descargar XML UBL 2.1' y 'Descargar CDR SUNAT'.")
+    doc.add_paragraph().paragraph_format.space_after = Pt(6)
 
-    # MÓDULO 2: INVENTARIO, LOTES Y TRANSFERENCIAS
-    style_heading_2("Módulo 2: Inventario, Kardex 13.1, Lotes FEFO y Transferencias GRE 09")
-    add_p("El módulo de Inventario (/inventario) se encuentra estructurado en 4 áreas de gestión logística:")
+    add_p("1.4 Impacto Contable Automático (Asiento en Libro Diario): ", "D. ")
+    add_p("Al confirmar la emisión del comprobante, Jexia ERP genera automáticamente en el Libro Diario el siguiente asiento contable cuadrado:")
+    add_bullet("Debe: Cuenta 1212 (Facturas, Boletas y otros comprobantes por cobrar - Emitidas en cartera) por el Total (100%).")
+    add_bullet("Haber: Cuenta 40111 (IGV - Cuenta propia 18%) por el débito fiscal.")
+    add_bullet("Haber: Cuenta 70121 (Venta local de mercaderías) por el subtotal gravado.")
+    add_bullet("Asiento de Costo de Ventas Simultáneo: Debe 69121 (Costo de ventas) vs. Haber 20111 (Mercaderías manufacturadas) valorizado al costo promedio exacto del Kardex.")
 
-    style_heading_3("2.1 Catálogo de Productos y Parámetros:")
-    add_bullet("Permite crear artículos asignando SKU, Nombre, Unidad de Medida (NIU, KGM, ZZ), Stock Mínimo y Precio.")
-    add_bullet("Fotografías: Permite asociar imágenes en alta definición para visualización en el catálogo y en la tienda web.")
-    add_bullet("Configuración de Lotes: Permite activar 'Seguimiento por Lote' (TrackingType.LOT) y fijar días de alerta de vencimiento.")
+    add_p("1.5 Impacto en Almacenes e Inventario (Kardex 13.1): ", "E. ")
+    add_bullet("Decremento inmediato de las unidades en el almacén de despacho.")
+    add_bullet("Generación de una línea de salida en el Kardex tipo SALIDA_VENTA vinculada al número de comprobante emitido.")
 
-    style_heading_3("2.2 Kardex Valorizado Ponderado (Formato SUNAT 13.1):")
-    add_p("Aplica la fórmula matemática oficial de promedio ponderado móvil:")
+    # -------------------------------------------------------------------------
+    # PROCESO 2: CONTROL DE LOTES Y VENCIMIENTOS (FEFO)
+    # -------------------------------------------------------------------------
+    style_heading_2("Proceso 2: Control de Lotes y Fechas de Vencimiento (Trazabilidad FEFO)")
+    add_p("2.1 Objetivo del Proceso: ", "A. ")
+    add_p("Monitorear el ciclo de vida de productos con vencimiento o partidas de producción (alimentos, cosméticos, químicos, prendas de vestir por lote de confección), garantizando que las partidas próximas a caducar se despachen primero conforme al método FEFO (First Expired, First Out).")
+
+    add_screenshot("public/screenshots/inventario_lotes.png", "Módulo de Inventario de Jexia ERP — Control de Lotes y Fechas de Vencimiento con Indicadores Visuales Semánticos (Disponible, Por Vencer y Vencido).")
+
+    add_p("2.2 Clasificación de Estados y Alertas Inteligentes: ", "B. ")
+    tbl_lotes = doc.add_table(rows=4, cols=3)
+    tbl_lotes.alignment = WD_TABLE_ALIGNMENT.CENTER
+    lotes_headers = ["Estado del Lote", "Criterio de Cálculo Temporal", "Comportamiento del Sistema y Acción Recomendada"]
+    for j, h in enumerate(lotes_headers):
+        cell = tbl_lotes.cell(0, j)
+        set_cell_background(cell, "0F172A")
+        set_cell_margins(cell, 70, 70, 90, 90)
+        p = cell.paragraphs[0]
+        r = p.add_run(h)
+        r.bold = True
+        r.font.name = "Segoe UI"
+        r.font.size = Pt(8.5)
+        r.font.color.rgb = RGBColor(255, 255, 255)
+
+    lotes_data = [
+        ("DISPONIBLE (Verde)", "Fecha de Vencimiento > Fecha Actual + Días de Alerta", "Partida con vida útil óptima. Habilitada para venta y transferencias regulares."),
+        ("POR VENCER (Ámbar)", "Fecha Actual <= Fecha de Vencimiento <= Fecha Actual + Alerta", "Alerta preventiva. Aplica política FEFO sugiriendo su despacho prioritario o promoción."),
+        ("VENCIDO (Rojo)", "Fecha de Vencimiento < Fecha Actual", "Partida caducada. El sistema bloquea su despacho comercial y sugiere dar de baja o merma.")
+    ]
+    for i, row in enumerate(lotes_data, start=1):
+        for j, val in enumerate(row):
+            cell = tbl_lotes.cell(i, j)
+            bg = "F8FAFC" if i % 2 == 1 else "FFFFFF"
+            set_cell_background(cell, bg)
+            set_cell_margins(cell, 50, 50, 80, 80)
+            p = cell.paragraphs[0]
+            r = p.add_run(val)
+            r.font.name = "Segoe UI"
+            r.font.size = Pt(8)
+            r.font.color.rgb = COLOR_DARK
+
+    doc.add_paragraph().paragraph_format.space_after = Pt(6)
+
+    # -------------------------------------------------------------------------
+    # PROCESO 3: TRANSFERENCIAS MULTI-ALMACÉN Y GRE REMITENTE (09)
+    # -------------------------------------------------------------------------
+    style_heading_2("Proceso 3: Transferencias Multi-Almacén y Guías de Remisión Remitente (GRE 09)")
+    add_p("3.1 Objetivo del Proceso: ", "A. ")
+    add_p("Permitir el traslado formal de existencias entre diferentes sucursales, plantas o depósitos de la empresa, cumpliendo con la obligación tributaria de emitir la Guía de Remisión Electrónica Remitente (GRE - Tipo SUNAT 09) bajo el estándar UBL 2.1 DespatchAdvice.")
+
+    add_p("3.2 Paso a Paso Operativo: ", "B. ")
+    add_bullet("Paso 1: Diríjase a /inventario y presione la pestaña 'Transferencias & GRE (09)'.")
+    add_bullet("Paso 2: Presione el botón 'Nueva Transferencia / GRE'.")
+    add_bullet("Paso 3: Seleccione el Almacén Origen (ej: ALM01 Almacén Central Lima) y el Almacén Destino (ej: ALM02 Tienda Gamarra).")
+    add_bullet("Paso 4: Seleccione el producto (ej: POLO VERANO COLOR ROJO TALLA L) e indique la cantidad a trasladar.")
+    add_bullet("Paso 5: Ingrese la información del transporte (Modalidad privada 02 o pública 01, datos del conductor con DNI y Licencia de conducir, vehículo con placa de rodaje, peso total en kilogramos y direcciones con código de Ubigeo).")
+    add_bullet("Paso 6: Presione 'Emitir Transferencia y GRE Remitente'.")
+
+    add_p("3.3 Validación y Salidas Oficiales de la GRE: ", "C. ")
+    add_bullet("Se genera el archivo XML DespatchAdvice firmado digitalmente con código Hash SHA-256.")
+    add_bullet("Se descuenta el stock en el Almacén Origen y se abona en el Almacén Destino en una única transacción atómica.")
+    add_bullet("Se generan dos movimientos en el Kardex: TRANSFERENCIA_SALIDA y TRANSFERENCIA_ENTRADA manteniendo el costo promedio ponderado.")
+    add_bullet("La guía puede visualizarse e imprimirse en formato A4 con su código QR tributario para ser portada por el transportista.")
+
+    # -------------------------------------------------------------------------
+    # PROCESO 4: COBRANZAS, PAGOS Y CONCILIACIÓN BANCARIA
+    # -------------------------------------------------------------------------
+    style_heading_2("Proceso 4: Cobranzas, Pagos y Conciliación Bancaria (CXC / CXP)")
+    add_p("4.1 Objetivo del Proceso: ", "A. ")
+    add_p("Monitorear el flujo monetario de la empresa, controlando las facturas a crédito pendientes de cobro a clientes (PCGE 1212) y las deudas con proveedores (PCGE 4212), permitiendo registrar amortizaciones totales o parciales y conciliando con las cuentas bancarias.")
+
+    add_screenshot("public/screenshots/finanzas_cxc.png", "Módulo de Finanzas de Jexia ERP — Control de Cuentas por Cobrar (CXC), Cuentas por Pagar (CXP) y Registro de Pagos con Conciliación Bancaria.")
+
+    add_p("4.2 Guía Paso a Paso para Registrar un Cobro de Factura: ", "B. ")
+    add_bullet("Paso 1: Ingrese al módulo /finanzas en la pestaña 'Cuentas por Cobrar (Clientes)'.")
+    add_bullet("Paso 2: Localice la factura a amortizar (ej: F001-000020 de Corporación Textil del Sur S.A.C.).")
+    add_bullet("Paso 3: Presione el botón azul 'Cobrar' para desplegar el modal de conciliación.")
+    add_bullet("Paso 4: Verifique el saldo pendiente actual. El sistema sugiere el saldo total, pero permite ingresar cualquier importe parcial.")
+    add_bullet("Paso 5: Indique la fecha de la operación, el medio de pago (Transferencia Bancaria, Depósito, Yape, Tarjeta o Efectivo).")
+    add_bullet("Paso 6: Especifique la cuenta bancaria de destino (ej: BCP Soles Cta Cte) y el N° de Operación Bancaria / Voucher (ej: OP-9842103).")
+    add_bullet("Paso 7: Presione 'Confirmar Operación'.")
+
+    add_p("4.3 Dinámica Contable de la Cobranza (Partida Doble Automática): ", "C. ")
+    add_bullet("Debe: Cuenta 1041 (Cuentas Corrientes Operativas en Bancos) por el importe cobrado.")
+    add_bullet("Haber: Cuenta 1212 (Facturas y Boletas Emitidas en Cartera) por el importe cobrado.")
+    add_bullet("Si la factura tenía cuotas programadas (PaymentSchedule), el sistema las amortiza automáticamente bajo el método cronológico FIFO.")
+
+    # -------------------------------------------------------------------------
+    # PROCESO 5: COMPRAS Y GESTIÓN DE PROVEEDORES
+    # -------------------------------------------------------------------------
+    style_heading_2("Proceso 5: Compras y Abastecimiento de Mercaderías")
+    add_p("5.1 Objetivo del Proceso: ", "A. ")
+    add_p("Administrar la cadena de suministro, desde la emisión de la Orden de Compra (OC) hasta la recepción física en bodega y la vinculación de la factura emitida por el proveedor.")
+
+    add_p("5.2 Recálculo Automático del Costo Promedio Ponderado: ", "B. ")
+    add_p("Al presionar 'Recibir Mercadería' en una Orden de Compra, Jexia ERP ejecuta la siguiente fórmula en milisegundos:")
     add_callout(
-        "Costo Promedio Ponderado = (Valor Total Anterior + Costo Total Entrada) / (Cantidad Anterior + Cantidad Entrada)\nCada salida se valoriza estrictamente al costo promedio vigente al momento de la operación.",
-        "FÓRMULA MATEMÁTICA DEL KARDEX",
+        "Nuevo Costo Promedio = [(Stock Físico Actual x Costo Promedio Actual) + (Cantidad Ingresada x Costo Unitario de Compra)] / (Stock Físico Actual + Cantidad Ingresada)\nEsto garantiza que las valorizaciones de inventario para balances generales y SUNAT reflejen con precisión matemática la realidad económica.",
+        "ACTUALIZACIÓN AUTOMÁTICA DE COSTOS",
         "info"
     )
 
-    style_heading_3("2.3 Transferencias Multi-Almacén y Guía de Remisión Remitente (GRE 09):")
-    add_bullet("Paso 1: Diríjase a la pestaña 'Transferencias & GRE (09)' y presione 'Nueva Transferencia / GRE'.")
-    add_bullet("Paso 2: Elija el Almacén Origen (donde hay existencias) y el Almacén Destino.")
-    add_bullet("Paso 3: Seleccione el producto (ej: POLO VERANO COLOR ROJO TALLA L) e indique las unidades a mover.")
-    add_bullet("Paso 4: Complete los datos obligatorios del transporte (Modalidad privada/pública, conductor, DNI, licencia de conducir, placa de rodaje, peso total en KGM y direcciones de partida y llegada con Ubigeo).")
-    add_bullet("Paso 5: Presione 'Emitir Transferencia y GRE Remitente'. El sistema descargará el stock del origen, cargará en destino, registrará los dos movimientos en el Kardex y generará la Guía oficial serie T001 con su XML DespatchAdvice.")
+    # -------------------------------------------------------------------------
+    # PROCESO 6: CONTABILIDAD PCGE Y LIBROS ELECTRÓNICOS SIRE / PLE
+    # -------------------------------------------------------------------------
+    style_heading_2("Proceso 6: Contabilidad General PCGE 2019 y Libros Electrónicos")
+    add_p("6.1 Objetivo del Proceso: ", "A. ")
+    add_p("Mantener la contabilidad al día sin intervención manual repetitiva, garantizando que el Libro Diario registre cada transacción con partida doble y generando los archivos oficiales para los sistemas de libros electrónicos de SUNAT.")
 
-    style_heading_3("2.4 Control de Lotes y Trazabilidad FEFO:")
-    add_p("Diseñado para confecciones, farmacéuticas y perecibles:")
-    add_bullet("Estado DISPONIBLE (Verde): Partida vigente y apta para despacho comercial.")
-    add_bullet("Estado POR VENCER (Ámbar): Partida que entra en el periodo de alerta (ej: faltan menos de 30 o 45 días). Aplica prioridad FEFO (First Expired, First Out) recomendando su venta inmediata antes que lotes más recientes.")
-    add_bullet("Estado VENCIDO (Rojo): Partida cuya vida útil expiró, emitiendo alerta para retención o baja contable.")
+    add_p("6.2 Generación de Archivos para SIRE y PLE 5.1: ", "B. ")
+    add_bullet("SIRE RVIE (Formato 14.1): Archivo estructurado de texto plano con el registro detallado de todas las ventas emitidas en el periodo tributario.")
+    add_bullet("SIRE RCE (Formato 8.1): Archivo estructurado con las adquisiciones y compras recibidas en el periodo tributario.")
+    add_bullet("PLE Libro Diario (Formato 5.1): Exportación de todos los asientos contables con sus códigos de cuenta a 5 dígitos y glosas explicativas.")
 
-    # MÓDULO 3: COBRANZAS Y PAGOS
-    style_heading_2("Módulo 3: Cobranzas, Pagos y Conciliación Bancaria (CXC / CXP)")
-    add_p("El módulo de Finanzas (/finanzas) permite liquidar deudas comerciales y conciliar el flujo monetario con el Plan Contable:")
+    doc.add_page_break()
 
-    style_heading_3("3.1 Cuentas por Cobrar (Clientes - PCGE 1212):")
-    add_bullet("Muestra todas las facturas a crédito, su saldo cobrado, saldo pendiente y fecha límite de pago.")
-    add_bullet("Semáforo de Morosidad: Las facturas con fecha de vencimiento superada se marcan automáticamente como 'VENCIDO'.")
-    add_bullet("Registro de Cobro: Al presionar 'Cobrar', se abre el modal donde se ingresa el monto amortizado, banco receptor (BCP, BBVA, etc.) y número de operación/voucher. Al confirmar, el sistema amortiza las cuotas del crédito y genera el Asiento de Cobranza: Debe 1041 / Haber 1212.")
+    # =========================================================================
+    # 6. MATRIZ DE PREGUNTAS FRECUENTES Y CASOS ESPECIALES
+    # =========================================================================
+    style_heading_1("PREGUNTAS FRECUENTES, ERRORES COMUNES Y RESOLUCIÓN")
+    
+    tbl_faq = doc.add_table(rows=5, cols=3)
+    tbl_faq.alignment = WD_TABLE_ALIGNMENT.CENTER
+    faq_headers = ["Situación Operativa", "Causa o Explicación", "Procedimiento de Solución en Jexia ERP"]
+    for j, h in enumerate(faq_headers):
+        cell = tbl_faq.cell(0, j)
+        set_cell_background(cell, "0F172A")
+        set_cell_margins(cell, 70, 70, 90, 90)
+        p = cell.paragraphs[0]
+        r = p.add_run(h)
+        r.bold = True
+        r.font.name = "Segoe UI"
+        r.font.size = Pt(8.5)
+        r.font.color.rgb = RGBColor(255, 255, 255)
 
-    style_heading_3("3.2 Cuentas por Pagar (Proveedores - PCGE 4212):")
-    add_bullet("Muestra las compras pendientes de pago. Al presionar 'Pagar', se registra el desembolso bancario y el asiento automático: Debe 4212 / Haber 1041.")
+    faq_data = [
+        ("Cliente solicita anular una factura ya aceptada por SUNAT", "No es posible eliminar el registro físico debido a la inmutabilidad tributaria.", "Emita una Nota de Crédito (07) en /ventas seleccionando motivo '01 Anulación de la operación'. El sistema reintegrará el stock y generará el asiento de ajuste."),
+        ("El sistema no permite emitir un comprobante por falta de existencias", "La regla de control de stock impide que el almacén quede con existencias negativas.", "Verifique si hay una compra pendiente por recepcionar o realice una Transferencia Multi-Almacén desde otra sede con stock disponible."),
+        ("Un lote figura con semáforo rojo (VENCIDO)", "La fecha de vencimiento configurada en el lote ha sido superada por la fecha actual.", "Retenga la partida para evitar su despacho comercial. Si corresponde mermar el producto, registre la baja contable."),
+        ("El cliente paga una factura a crédito en dos partes", "Venta emitida bajo condición de crédito (ej: CREDITO_30).", "Ingrese a /finanzas, presione 'Cobrar' y digite el monto del primer abono. La factura quedará en estado PARCIAL hasta el pago del saldo final.")
+    ]
+    for i, row in enumerate(faq_data, start=1):
+        for j, val in enumerate(row):
+            cell = tbl_faq.cell(i, j)
+            bg = "F8FAFC" if i % 2 == 1 else "FFFFFF"
+            set_cell_background(cell, bg)
+            set_cell_margins(cell, 50, 50, 80, 80)
+            p = cell.paragraphs[0]
+            r = p.add_run(val)
+            r.font.name = "Segoe UI"
+            r.font.size = Pt(8)
+            r.font.color.rgb = COLOR_DARK
 
-    style_heading_3("3.3 Historial de Transacciones & Conciliación:")
-    add_bullet("Bitácora inmutable con todos los cobros y pagos registrados, número de constancia bancaria y referencia cruzada con el asiento en el Libro Diario.")
+    doc.add_paragraph().paragraph_format.space_after = Pt(14)
 
-    # MÓDULO 4: CONTABILIDAD PCGE Y LIBROS ELECTRÓNICOS
-    style_heading_2("Módulo 4: Contabilidad General PCGE 2019 y Libros Electrónicos")
-    add_p("Garantiza que la contabilidad refleje con exactitud la realidad operativa:")
-    add_bullet("Plan Contable a 5 dígitos preconfigurado: 1011 (Caja), 1041 (Cuentas Corrientes Bancos), 1212 (Emitidas en Cartera), 20111 (Mercaderías Manufacturadas), 40111 (IGV Cuenta Propia), 4212 (Facturas por Pagar Emitidas), 6011 (Compras), 69121 (Costo de Ventas) y 70121 (Ventas Locales).")
-    add_bullet("Principio de Partida Doble: Todo asiento valida estrictamente que la suma del Debe sea idéntica a la suma del Haber.")
-    add_bullet("Generación SIRE: Exportación directa de archivos planos para el Registro de Ventas (RVIE 14.1) y Registro de Compras (RCE 8.1).")
-    add_bullet("Generación PLE 5.1: Exportación del Libro Diario para envío formal al software de libros electrónicos de SUNAT.")
+    style_heading_2("Conclusión del Manual de Operaciones")
+    add_p("Jexia ERP v2.0 proporciona un control 360° sobre la operativa comercial, logística y financiera. Con este documento, cualquier usuario nuevo o supervisor de área cuenta con la guía paso a paso para operar con máxima precisión y total tranquilidad tributaria.")
 
-    # CONCLUSIONES Y CRITERIOS DE PRODUCCIÓN
-    style_heading_2("5. Criterios de Calidad y Puesta en Producción")
-    add_p("Jexia ERP v2.0 ha superado satisfactoriamente las pruebas de esfuerzo transaccional, cálculo de impuestos, generación de hashes digitales y concurrencia multi-almacén, encontrándose apto para operar como el sistema medular de cualquier MYPE en el Perú.")
-
-    # Guardar documento
     output_path = os.path.abspath("docs/JEXIA_ERP_DOCUMENTO_PROFESIONAL_MAESTRO.docx")
     doc.save(output_path)
-    print(f"Documento Word profesional generado con éxito en: {output_path}")
+    print(f"Documento Word enriquecido y actualizado con éxito en: {output_path}")
 
 if __name__ == "__main__":
     create_document()
