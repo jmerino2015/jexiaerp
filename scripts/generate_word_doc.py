@@ -579,8 +579,123 @@ def create_document():
 
     doc.add_paragraph().paragraph_format.space_after = Pt(14)
 
-    style_heading_2("Conclusión del Manual de Operaciones")
-    add_p("Jexia ERP v2.0 proporciona un control 360° sobre la operativa comercial, logística y financiera. Con este documento, cualquier usuario nuevo o supervisor de área cuenta con la guía paso a paso para operar con máxima precisión y total tranquilidad tributaria.")
+    # =========================================================================
+    # 7. PARTE III: ESTRATEGIA COMERCIAL Y PLANES DE SUSCRIPCIÓN SAAS
+    # =========================================================================
+    doc.add_page_break()
+    style_heading_1("PARTE III: ESTRATEGIA COMERCIAL Y MODELO DE PRECIOS SAAS")
+
+    add_p("Jexia ERP opera bajo un modelo de suscripción como servicio (SaaS - Software as a Service), optimizado para ofrecer a las micro, pequeñas y medianas empresas peruanas acceso a tecnología de clase mundial a un costo predecible, accesible y con un retorno de inversión inmediato.")
+
+    add_callout(
+        "Gracias a la implementación de la Conexión Directa Web Service SOAP con SUNAT (Camino 1), Jexia ERP no traslada costos de intermediación por comprobante a sus clientes. Esto permite estructurar planes con generosos paquetes de comprobantes mensuales sin sobrecostos por timbrado de terceros.",
+        "VENTAJA COMPETITIVA DE PRECIOS",
+        "info"
+    )
+
+    style_heading_2("1. Matriz de Planes y Niveles de Suscripción")
+    add_p("La propuesta comercial se estructura en 3 niveles de servicio diseñados para acompañar la madurez y volumen operativo de cada empresa, situando el plan de S/ 300.00 como el estándar y núcleo de mayor valor del mercado:")
+
+    tbl_pricing = doc.add_table(rows=12, cols=4)
+    tbl_pricing.alignment = WD_TABLE_ALIGNMENT.CENTER
+    pricing_headers = ["Característica / Módulo", "PLAN EMPRENDEDOR\n(Inicial)", "PLAN PYME PRO\n★ RECOMENDADO ★", "PLAN CORPORATIVO\n(Avanzado)"]
+    for j, h in enumerate(pricing_headers):
+        cell = tbl_pricing.cell(0, j)
+        bg = "2563EB" if j == 2 else "0F172A"
+        set_cell_background(cell, bg)
+        set_cell_margins(cell, 80, 80, 100, 100)
+        p = cell.paragraphs[0]
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        r = p.add_run(h)
+        r.bold = True
+        r.font.name = "Segoe UI"
+        r.font.size = Pt(8.5)
+        r.font.color.rgb = RGBColor(255, 255, 255)
+
+    pricing_data = [
+        ("Tarifa Mensual (Suscripción)", "S/ 180.00 + IGV / mes", "S/ 300.00 + IGV / mes", "S/ 490.00 + IGV / mes"),
+        ("Tarifa Anual (Pago Adelantado)", "S/ 1,800.00 + IGV / año", "S/ 3,000.00 + IGV / año\n(Ahorro de S/ 600)", "S/ 4,900.00 + IGV / año\n(Ahorro de S/ 980)"),
+        ("Usuarios Incluidos", "2 Usuarios concurrentes", "5 Usuarios concurrentes", "10 Usuarios concurrentes"),
+        ("Empresas (RUCs)", "1 Empresa (RUC)", "1 Empresa (RUC)", "1 Empresa (Multi-RUC opcional)"),
+        ("Capacidad de Almacenes", "1 Almacén principal", "ALMACENES ILIMITADOS", "ALMACENES ILIMITADOS"),
+        ("Comprobantes de Pago al Mes", "Hasta 500 comprobantes/mes", "HASTA 2,000 / MES", "COMPROBANTES ILIMITADOS"),
+        ("Guías de Remisión Remitente (GRE 09)", "No incluido / Básico", "GRE 09 ILIMITADAS (SOAP)", "GRE 09 ILIMITADAS (SOAP)"),
+        ("Inventario y Trazabilidad", "Kardex valorizado estándar", "Kardex 13.1 + Lotes FEFO", "Kardex 13.1 + Lotes FEFO"),
+        ("Cuentas por Cobrar/Pagar (CXC/CXP)", "Control de saldos simple", "Cronograma de cuotas + Conciliación PCGE", "Gestión multi-banco avanzada"),
+        ("Contabilidad & Libros Electrónicos", "Reporte de ventas básico", "SIRE (RVIE/RCE) + PLE 5.1 Libro Diario", "SIRE + PLE 5.1 + Auditoría"),
+        ("Tienda E-commerce Retail B2C", "Opcional con recargo", "Incluida con stock en vivo", "Incluida con pasarelas integradas")
+    ]
+
+    for i, row in enumerate(pricing_data, start=1):
+        for j, val in enumerate(row):
+            cell = tbl_pricing.cell(i, j)
+            # Resaltar la columna del plan recomendado
+            if j == 2:
+                bg = "EFF6FF" if i % 2 == 1 else "DBEAFE"
+            else:
+                bg = "F8FAFC" if i % 2 == 1 else "FFFFFF"
+            set_cell_background(cell, bg)
+            set_cell_margins(cell, 55, 55, 80, 80)
+            p = cell.paragraphs[0]
+            if j == 0:
+                p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+                r = p.add_run(val)
+                r.bold = True
+            else:
+                p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                r = p.add_run(val)
+                if j == 2:
+                    r.bold = True
+            r.font.name = "Segoe UI"
+            r.font.size = Pt(8)
+            r.font.color.rgb = COLOR_DARK
+
+    doc.add_paragraph().paragraph_format.space_after = Pt(8)
+
+    style_heading_2("2. Desglose del Plan Promedio Recomendado: PLAN PYME PRO (S/ 300.00)")
+    add_p("El Plan PYME Pro representa la columna vertebral de la oferta de Jexia ERP. Con una tarifa fija de S/ 300.00 + IGV al mes (equivalente a solo S/ 10.00 soles diarios), cubre holgadamente el 95% de las necesidades operativas de una empresa comercial, textil o de distribución en crecimiento:")
+    add_bullet("5 Licencias de Usuario incluidas: Permite habilitar simultáneamente al Administrador, Cajero/Vendedor, Jefe de Almacén, Encargado de Compras y Contador externo.", "Equipo de Trabajo Completo: ")
+    add_bullet("Almacenes Ilimitados: La empresa puede crear y gestionar sin costo adicional su Almacén Central, Tiendas físicas, Puntos de Venta y Depósitos de Tránsito, realizando transferencias internas fluidas.", "Cero Restricción de Sucursales: ")
+    add_bullet("2,000 Comprobantes de Pago Electrónicos mensuales: Cobertura amplia para emitir Facturas (01), Boletas (03) y Notas de Crédito (07) con envío directo a SUNAT y recepción de CDR oficial.", "Volumen Operativo Holgado: ")
+    add_bullet("Guías de Remisión Remitente (GRE 09) Ilimitadas: Despacho y traslado de mercadería entre almacenes y a clientes cumpliendo la normativa de transporte de SUNAT sin límites mensuales.", "Logística de Despacho sin Freno: ")
+    add_bullet("Gestión Financiera & Libros SUNAT: Control de cobros a crédito a 15/30/60 días (Res. 193-2020), pagos a proveedores, exportación de archivos SIRE RVIE/RCE y PLE 5.1.", "Cumplimiento Contable Total: ")
+
+    style_heading_2("3. Servicios Adicionales y Políticas de Crecimiento")
+    tbl_addons = doc.add_table(rows=4, cols=3)
+    tbl_addons.alignment = WD_TABLE_ALIGNMENT.CENTER
+    addons_headers = ["Servicio / Recurso Adicional", "Tarifa Vigente", "Descripción del Entregable"]
+    for j, h in enumerate(addons_headers):
+        cell = tbl_addons.cell(0, j)
+        set_cell_background(cell, "0F172A")
+        set_cell_margins(cell, 70, 70, 90, 90)
+        p = cell.paragraphs[0]
+        r = p.add_run(h)
+        r.bold = True
+        r.font.name = "Segoe UI"
+        r.font.size = Pt(8.5)
+        r.font.color.rgb = RGBColor(255, 255, 255)
+
+    addons_data = [
+        ("Puesta en Marcha & Onboarding (Pago Único)", "S/ 600.00 a S/ 900.00 + IGV", "Configuración de RUC, Certificado Digital .pfx, series electrónicas, migración inicial de catálogo de productos/clientes y 2 capacitaciones virtuales."),
+        ("Usuario Concurrente Adicional", "S/ 35.00 + IGV / mes", "Licencia de acceso adicional para un nuevo colaborador con permisos personalizados por módulo."),
+        ("Bloque Extra de Comprobantes (Plan Promedio)", "S/ 40.00 + IGV / mes por 500 cpe", "Ampliación de capacidad mensual si la empresa supera temporalmente los 2,000 comprobantes antes de migrar al Plan Corporativo.")
+    ]
+    for i, row in enumerate(addons_data, start=1):
+        for j, val in enumerate(row):
+            cell = tbl_addons.cell(i, j)
+            bg = "F8FAFC" if i % 2 == 1 else "FFFFFF"
+            set_cell_background(cell, bg)
+            set_cell_margins(cell, 50, 50, 80, 80)
+            p = cell.paragraphs[0]
+            r = p.add_run(val)
+            r.font.name = "Segoe UI"
+            r.font.size = Pt(8)
+            r.font.color.rgb = COLOR_DARK
+
+    doc.add_paragraph().paragraph_format.space_after = Pt(14)
+
+    style_heading_2("Conclusión del Manual y Especificación de la Solución")
+    add_p("Jexia ERP v2.0 reúne la potencia funcional de los grandes sistemas de gestión con la simplicidad, agilidad y economía que exigen las empresas peruanas. Al combinar una arquitectura técnica robusta, conexión directa con SUNAT y un modelo comercial justo de S/ 300 mensuales, se consolida como la herramienta definitiva para ordenar, controlar y hacer crecer los negocios en el Perú.")
 
     output_path = os.path.abspath("docs/JEXIA_ERP_DOCUMENTO_PROFESIONAL_MAESTRO.docx")
     doc.save(output_path)
