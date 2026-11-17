@@ -11,6 +11,7 @@ import {
   Store,
   ExternalLink,
   PanelLeft,
+  LogOut,
 } from "lucide-react";
 import { useSidebar } from "@/context/SidebarContext";
 
@@ -105,7 +106,7 @@ export function Header({
           <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#EF4444] ring-2 ring-white" />
         </button>
 
-        {/* Perfil de Usuario */}
+        {/* Perfil de Usuario y Cerrar Sesión */}
         <div className="flex items-center gap-2.5 pl-2">
           <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs shadow-inner">
             CM
@@ -116,6 +117,13 @@ export function Header({
               <Shield className="w-3 h-3 text-[#2563EB]" /> {userRole}
             </p>
           </div>
+          <Link
+            href="/login"
+            className="p-1.5 ml-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+            title="Cerrar sesión / Salir"
+          >
+            <LogOut className="w-4 h-4" />
+          </Link>
         </div>
       </div>
     </header>

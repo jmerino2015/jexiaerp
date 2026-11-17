@@ -17,6 +17,7 @@ import {
   PanelLeftClose,
   X,
   CreditCard,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { JexiaLogo } from "@/components/JexiaLogo";
@@ -179,15 +180,22 @@ export function Sidebar() {
       </nav>
 
       {/* Quick Metrics Footer */}
-      <div className="p-4 border-t border-white/10 bg-[#0F172A]/70">
-        <div className="flex items-center justify-between text-xs text-slate-400 mb-1.5">
+      <div className="p-4 border-t border-white/10 bg-[#0F172A]/70 space-y-3">
+        <div className="flex items-center justify-between text-xs text-slate-400">
           <span className="flex items-center gap-1 font-medium">
             <TrendingUp className="w-3.5 h-3.5 text-[#10B981]" /> Moneda
           </span>
           <span className="font-bold text-white tabular-nums">Soles (PEN)</span>
         </div>
-        <div className="text-[11px] text-slate-400">
-          Versión 2025.2.0 • Multi-almacén
+        <div className="flex items-center justify-between text-[11px] text-slate-400">
+          <span>v2025.2 Multi-almacén</span>
+          <Link
+            href="/login"
+            className="flex items-center gap-1 text-xs text-rose-400 hover:text-rose-300 font-medium transition-colors"
+          >
+            <LogOut className="w-3 h-3" />
+            <span>Salir</span>
+          </Link>
         </div>
       </div>
     </aside>
