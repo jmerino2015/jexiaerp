@@ -13,6 +13,8 @@ import {
 } from "@prisma/client";
 import { SunatService } from "@/lib/sunat";
 import { UblBuilder } from "@/lib/ubl-builder";
+import { XmlSigner } from "@/lib/xml-signer";
+import { SunatSoapClient } from "@/lib/sunat-soap-client";
 
 interface SaleItemInput {
   productId: string;
@@ -240,11 +242,12 @@ export async function createSalesDocument(formData: {
       let hash = "";
 
       if (!isQuote) {
+        // 4.1 Generar XML UBL 2.1
         const ublRes = UblBuilder.buildInvoiceXml({
           company: {
             ruc: company.ruc,
             businessName: company.businessName,
-            tradeName: company.tradeName || "",
+            tradeName: company.tradeName || undefined,
             address: company.fiscalAddress,
             ubigeo: company.ubigeo || "150131",
             department: company.department || "Lima",
@@ -285,9 +288,24 @@ export async function createSalesDocument(formData: {
             : undefined,
         });
 
-        xmlContent = ublRes.xml;
-        hash = ublRes.hash;
-        cdrXmlContent = UblBuilder.buildCdrXml(company.ruc, sunatCode, fullNumber, hash);
+        // 4.2 Firmar digitalmente con XMLDSig
+        const signed = XmlSigner.signUblXml(ublRes.xml);
+        xmlContent = signed.signedXml;
+        hash = signed.digestValue;
+
+        // 4.3 Envío Directo Web Service SOAP a SUNAT / OSE (Camino 1)
+        const soapRes = await SunatSoapClient.sendBill({
+          companyRuc: company.ruc,
+          solUser: company.solUser || "MODDATOS",
+          solPass: company.solPass || "moddatos",
+          docType: sunatCode as any,
+          series: seriesTarget,
+          number: nextNumber,
+          signedXmlContent: xmlContent,
+          environment: (process.env.SUNAT_ENV as any) || "BETA",
+        });
+
+        cdrXmlContent = soapRes.cdrXmlContent || UblBuilder.buildCdrXml(company.ruc, sunatCode, fullNumber, hash);
       }
 
       // 5. Crear Comprobante de Venta en BD
@@ -495,5 +513,86 @@ export async function convertQuoteToSalesDoc(
   } catch (error: any) {
     console.error("Error converting quote:", error);
     return { success: false, error: error.message || "Error al convertir la cotización" };
+  }
+}
+
+/**
+ * Prueba la conexión directa Web Service SOAP con los servidores de SUNAT / OSE (Camino 1)
+ */
+export async function testSunatConnection() {
+  try {
+    const company = await prisma.company.findFirst();
+    if (!company) throw new Error("No hay empresa configurada.");
+
+    const env = (process.env.SUNAT_ENV as any) || "BETA";
+    const endpoint = SunatSoapClient.getEndpoint(env);
+
+    const testXml = UblBuilder.buildInvoiceXml({
+      company: {
+        ruc: company.ruc,
+        businessName: company.businessName,
+        address: company.fiscalAddress,
+        ubigeo: company.ubigeo || "150131",
+        department: company.department || "Lima",
+        province: company.province || "Lima",
+        district: company.district || "San Isidro",
+      },
+      customer: {
+        docType: "RUC",
+        docNumber: "20556677881",
+        legalName: "EMPRESA PRUEBA CONEXION S.A.C.",
+        address: "Av. Conexión 123",
+      },
+      docType: "01",
+      series: "F001",
+      number: 99999,
+      issueDate: new Date(),
+      currency: "PEN",
+      subtotalGravado: 10.0,
+      igvAmount: 1.8,
+      totalAmount: 11.8,
+      items: [
+        {
+          sku: "TEST-CONN",
+          name: "PRUEBA DE CONECTIVIDAD SOAP SUNAT",
+          unitCode: "NIU",
+          quantity: 1,
+          unitPrice: 11.8,
+          subtotal: 10.0,
+          igvAmount: 1.8,
+          totalAmount: 11.8,
+        },
+      ],
+    });
+
+    const signed = XmlSigner.signUblXml(testXml.xml);
+
+    const res = await SunatSoapClient.sendBill({
+      companyRuc: company.ruc,
+      solUser: company.solUser || "MODDATOS",
+      solPass: company.solPass || "moddatos",
+      docType: "01",
+      series: "F001",
+      number: 99999,
+      signedXmlContent: signed.signedXml,
+      environment: env,
+    });
+
+    return {
+      success: true,
+      endpoint,
+      environment: env,
+      companyRuc: company.ruc,
+      solUser: company.solUser || "MODDATOS",
+      sunatStatus: res.sunatStatus,
+      responseCode: res.responseCode,
+      description: res.description,
+      rawError: res.error,
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      error: error.message || "Error al comunicar con SUNAT",
+    };
   }
 }

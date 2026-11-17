@@ -4,6 +4,7 @@ import { useState } from "react";
 import { formatPEN, formatDate } from "@/lib/utils";
 import { createSalesDocument, convertQuoteToSalesDoc } from "@/app/actions/sales";
 import { DocumentViewerModal, SalesDocDetail } from "./DocumentViewerModal";
+import { SunatConnectionModal } from "./SunatConnectionModal";
 import {
   Receipt,
   PlusCircle,
@@ -17,6 +18,7 @@ import {
   Clock,
   AlertCircle,
   Percent,
+  Server,
 } from "lucide-react";
 
 interface CustomerOption {
@@ -47,6 +49,7 @@ export function SalesManager({
   const [activeTab, setActiveTab] = useState<"comprobantes" | "pos" | "cotizaciones">("comprobantes");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDocForView, setSelectedDocForView] = useState<SalesDocDetail | null>(null);
+  const [isSunatModalOpen, setIsSunatModalOpen] = useState(false);
 
   // POS State
   const [posDocType, setPosDocType] = useState<"FACTURA" | "BOLETA" | "COTIZACION" | "NOTA_CREDITO">("BOLETA");
@@ -234,18 +237,30 @@ export function SalesManager({
               />
             </div>
 
-            <button
-              onClick={() => {
-                setPosDocType(activeTab === "cotizaciones" ? "COTIZACION" : "BOLETA");
-                setActiveTab("pos");
-              }}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold shadow-sm transition-all"
-            >
-              <PlusCircle className="w-4 h-4" />
-              <span>
-                {activeTab === "cotizaciones" ? "Nueva Cotización" : "Nueva Venta (Factura / Boleta)"}
-              </span>
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setIsSunatModalOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-blue-50 text-[#2563EB] border border-blue-200 hover:bg-blue-100 text-xs font-semibold transition-all shadow-2xs"
+                title="Monitorear y probar el Web Service SOAP de SUNAT"
+              >
+                <Server className="w-3.5 h-3.5" />
+                <span>Conexión SOAP SUNAT (Camino 1)</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setPosDocType(activeTab === "cotizaciones" ? "COTIZACION" : "BOLETA");
+                  setActiveTab("pos");
+                }}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold shadow-sm transition-all"
+              >
+                <PlusCircle className="w-4 h-4" />
+                <span>
+                  {activeTab === "cotizaciones" ? "Nueva Cotización" : "Nueva Venta (Factura / Boleta)"}
+                </span>
+              </button>
+            </div>
           </div>
 
           <div className="bg-white rounded-xl border border-[#E2E8F0] overflow-hidden shadow-xs">
@@ -680,6 +695,12 @@ export function SalesManager({
           </form>
         </div>
       )}
+
+      {/* MODAL DE CONEXION SOAP SUNAT / OSE (CAMINO 1) */}
+      <SunatConnectionModal
+        isOpen={isSunatModalOpen}
+        onClose={() => setIsSunatModalOpen(false)}
+      />
 
       {/* MODAL DE VISTA PREVIA (A4 / TICKET / XML / CDR) */}
       {selectedDocForView && (
