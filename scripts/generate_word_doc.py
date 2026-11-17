@@ -320,7 +320,7 @@ def create_document():
     add_bullet(" En el mismo milisegundo en que se crea el comprobante o se concilia un cobro, se genera el asiento de partida doble en el Libro Diario.", "Contabilidad Oficial PCGE: ")
 
     style_heading_2("2. Estructura de Desglose del Trabajo (WBS / EDT)")
-    tbl_wbs = doc.add_table(rows=10, cols=3)
+    tbl_wbs = doc.add_table(rows=9, cols=3)
     tbl_wbs.alignment = WD_TABLE_ALIGNMENT.CENTER
     wbs_headers = ["Paquete EDT", "Módulos y Capacidades del Sistema", "Base Normativa"]
     for j, h in enumerate(wbs_headers):
@@ -335,15 +335,14 @@ def create_document():
         r.font.color.rgb = RGBColor(255, 255, 255)
 
     wbs_data = [
-        ("EDT 01: Identidad & UX", "Logotipo tricolor SVG, Sidebar colapsable animado, semáforo visual de colores.", "Guía de Estilo Jexia"),
-        ("EDT 02: Datos Maestros (MDM)", "Directorio de Clientes (RUC/DNI/Ubigeo), Proveedores (CCI/Banco de la Nación SPOT) y Catálogo de Productos (SKU/EAN-13/UNSPSC).", "R.S. 193-2020 / Cat. 03, 07, 25, 54"),
-        ("EDT 03: Ventas & Facturación", "POS, Facturas 01, Boletas 03, Cotizaciones, Notas de Crédito 07, Detracciones SPOT, A4 y Ticket.", "SUNAT UBL 2.1 / D.L. 940"),
-        ("EDT 04: E-commerce Retail", "Catálogo B2C online, carrito, checkout delivery/pickup, pasarelas de pago y facturación.", "Comercio Electrónico"),
-        ("EDT 05: Compras & Costos", "Órdenes de Compra (OC01), recepción de mercadería, cálculo automático de costo promedio.", "Abastecimiento"),
-        ("EDT 06: Inventario & Logística", "Kardex 13.1, Lotes y FEFO (ProductLot), Transferencias Multi-Almacén y GRE 09.", "SUNAT Res. 123-2022"),
-        ("EDT 07: Cobranzas & Pagos", "Cuentas por cobrar (1212), cuentas por pagar (4212), cuotas a crédito, conciliación bancaria.", "SUNAT Res. 193-2020 / PCGE"),
-        ("EDT 08: Contabilidad General", "Plan contable a 5 dígitos, Libro Diario automático, exportación SIRE (RVIE/RCE) y PLE 5.1.", "PCGE 2019 / MEF"),
-        ("EDT 09: Analítica & KPIs", "Márgenes brutos, envejecimiento de cartera, rotación de existencias y ranking de productos.", "Gestión Gerencial")
+        ("EDT 01: Datos Maestros (MDM)", "Directorio de Clientes (RUC/DNI/Ubigeo), Proveedores (CCI/Banco de la Nación SPOT) y Catálogo de Productos (SKU/EAN-13/UNSPSC).", "R.S. 193-2020 / Cat. 03, 07, 25, 54"),
+        ("EDT 02: Ventas & Facturación", "POS, Facturas 01, Boletas 03, Cotizaciones, Notas de Crédito 07, Detracciones SPOT, A4 y Ticket.", "SUNAT UBL 2.1 / D.L. 940"),
+        ("EDT 03: E-commerce Retail", "Catálogo B2C online, carrito, checkout delivery/pickup, pasarelas de pago y facturación.", "Comercio Electrónico"),
+        ("EDT 04: Compras & Costos", "Órdenes de Compra (OC01), recepción de mercadería, cálculo automático de costo promedio.", "Abastecimiento"),
+        ("EDT 05: Inventario & Logística", "Kardex 13.1, Lotes y FEFO (ProductLot), Transferencias Multi-Almacén y GRE 09.", "SUNAT Res. 123-2022"),
+        ("EDT 06: Cobranzas & Pagos", "Cuentas por cobrar (1212), cuentas por pagar (4212), cuotas a crédito, conciliación bancaria.", "SUNAT Res. 193-2020 / PCGE"),
+        ("EDT 07: Contabilidad General", "Plan contable a 5 dígitos, Libro Diario automático, exportación SIRE (RVIE/RCE) y PLE 5.1.", "PCGE 2019 / MEF"),
+        ("EDT 08: Analítica & KPIs", "Márgenes brutos, envejecimiento de cartera, rotación de existencias y ranking de productos.", "Gestión Gerencial")
     ]
     for i, row in enumerate(wbs_data, start=1):
         for j, val in enumerate(row):
@@ -818,7 +817,7 @@ def create_document():
     add_bullet("Guías de Remisión Remitente (GRE 09) Ilimitadas: Despacho y traslado de mercadería entre almacenes y a clientes cumpliendo la normativa de transporte de SUNAT sin límites mensuales.", "Logística de Despacho sin Freno: ")
     add_bullet("Gestión Financiera & Libros SUNAT: Control de cobros a crédito a 15/30/60 días (Res. 193-2020), pagos a proveedores, exportación de archivos SIRE RVIE/RCE y PLE 5.1.", "Cumplimiento Contable Total: ")
 
-    style_heading_2("3. Servicios Adicionales y Políticas de Crecimiento")
+    style_heading_2("3. Servicios Adicionales y Puesta en Marcha (Onboarding)")
     tbl_addons = doc.add_table(rows=4, cols=3)
     tbl_addons.alignment = WD_TABLE_ALIGNMENT.CENTER
     addons_headers = ["Servicio / Recurso Adicional", "Tarifa Vigente", "Descripción del Entregable"]
@@ -834,7 +833,7 @@ def create_document():
         r.font.color.rgb = RGBColor(255, 255, 255)
 
     addons_data = [
-        ("Puesta en Marcha & Onboarding (Pago Único)", "S/ 600.00 a S/ 900.00 + IGV", "Configuración de RUC, Certificado Digital .pfx, series electrónicas, migración inicial de catálogo de productos/clientes y 2 capacitaciones virtuales."),
+        ("Puesta en Marcha & Onboarding (Pago Único)", "S/ 700.00 a S/ 1,000.00 + IGV", "Aprovisionamiento Cloud 24/7, configuración de RUC, Certificado Digital .pfx y credenciales SOL SUNAT, migración asistida de catálogos (Excel), parametrización de almacenes y capacitación por roles con soporte VIP."),
         ("Usuario Concurrente Adicional", "S/ 35.00 + IGV / mes", "Licencia de acceso adicional para un nuevo colaborador con permisos personalizados por módulo."),
         ("Bloque Extra de Comprobantes (Plan Promedio)", "S/ 40.00 + IGV / mes por 500 cpe", "Ampliación de capacidad mensual si la empresa supera temporalmente los 2,000 comprobantes antes de migrar al Plan Corporativo.")
     ]
@@ -850,16 +849,118 @@ def create_document():
             r.font.size = Pt(8)
             r.font.color.rgb = COLOR_DARK
 
-    doc.add_paragraph().paragraph_format.space_after = Pt(14)
+    doc.add_paragraph().paragraph_format.space_after = Pt(10)
 
-    style_heading_2("Conclusión del Manual y Especificación de la Solución")
-    add_p("Jexia ERP v2.0 reúne la potencia funcional de los grandes sistemas de gestión con la simplicidad, agilidad y economía que exigen las empresas peruanas. Al combinar una arquitectura técnica robusta, conexión directa con SUNAT y un modelo comercial justo de S/ 300 mensuales, se consolida como la herramienta definitiva para ordenar, controlar y hacer crecer los negocios en el Perú.")
+    # -------------------------------------------------------------------------
+    # SECCIÓN COMERCIAL ESTRATÉGICA PARA CIERRE DE IMPLEMENTACIÓN
+    # -------------------------------------------------------------------------
+    style_heading_2("4. ¿Por qué implementar Jexia ERP hoy? Retorno de Inversión Inmediato (ROI)")
+    add_p("La implementación de Jexia ERP no representa un gasto de software, sino una inversión con retorno positivo desde el primer mes de operación. El sistema genera ahorros tangibles y cuantificables en cuatro frentes críticos:")
+
+    tbl_roi = doc.add_table(rows=5, cols=3)
+    tbl_roi.alignment = WD_TABLE_ALIGNMENT.CENTER
+    roi_headers = ["Frente de Impacto", "Problema Común sin ERP", "Beneficio y Ahorro Cuantificable con Jexia ERP"]
+    for j, h in enumerate(roi_headers):
+        cell = tbl_roi.cell(0, j)
+        set_cell_background(cell, "1E3A5F")
+        set_cell_margins(cell, 70, 70, 90, 90)
+        p = cell.paragraphs[0]
+        r = p.add_run(h)
+        r.bold = True
+        r.font.name = "Segoe UI"
+        r.font.size = Pt(8.5)
+        r.font.color.rgb = RGBColor(255, 255, 255)
+
+    roi_data = [
+        ("Control de Mermas y Vencimientos", "Pérdidas de mercadería por partidas vencidas o mermas no detectadas en bodega.", "Ahorro estimado de S/ 1,500 a S/ 3,500 / mes gracias al control de lotes con alertas preventivas FEFO y Kardex en tiempo real."),
+        ("Velocidad de Facturación y Atención", "Demoras de 10 a 15 minutos emitiendo facturas en el portal de SUNAT o sistemas lentos.", "Reducción del 90% en tiempos operativos: emisión de comprobantes en menos de 15 segundos desde el POS o módulo de ventas."),
+        ("Blindaje Tributario SUNAT", "Riesgo de multas por comprobantes rechazados, inconsistencias en SIRE o retrasos en el Libro Diario.", "Cero multas tributarias. Timbrado directo vía SOAP oficial, validaciones automáticas de RUC y generación de SIRE RVIE/RCE al día."),
+        ("Recuperación de Cobranzas Morosas", "Descontrol en fechas de vencimiento de facturas a crédito y falta de seguimiento.", "Recuperación de hasta un 35% de cartera vencida mediante cronogramas automáticos de cuotas y semáforo visual de morosidad.")
+    ]
+    for i, row in enumerate(roi_data, start=1):
+        for j, val in enumerate(row):
+            cell = tbl_roi.cell(i, j)
+            bg = "F8FAFC" if i % 2 == 1 else "FFFFFF"
+            set_cell_background(cell, bg)
+            set_cell_margins(cell, 50, 50, 80, 80)
+            p = cell.paragraphs[0]
+            r = p.add_run(val)
+            r.font.name = "Segoe UI"
+            r.font.size = Pt(8)
+            r.font.color.rgb = COLOR_DARK
+
+    doc.add_paragraph().paragraph_format.space_after = Pt(10)
+
+    style_heading_2("5. Metodología de Puesta en Marcha Acelerada (Go-Live en 5 Días)")
+    add_p("A diferencia de los ERPs tradicionales que tardan meses en configurarse con altos costos ocultos, Jexia ERP aplica una metodología ágil 'Fast-Track' de 5 días hábiles que garantiza la salida en vivo sin interrumpir las operaciones diarias de la empresa:")
+
+    tbl_onboarding = doc.add_table(rows=6, cols=3)
+    tbl_onboarding.alignment = WD_TABLE_ALIGNMENT.CENTER
+    onb_headers = ["Fase y Cronograma", "Actividades Principales", "Entregable Concreto"]
+    for j, h in enumerate(onb_headers):
+        cell = tbl_onboarding.cell(0, j)
+        set_cell_background(cell, "0F172A")
+        set_cell_margins(cell, 70, 70, 90, 90)
+        p = cell.paragraphs[0]
+        r = p.add_run(h)
+        r.bold = True
+        r.font.name = "Segoe UI"
+        r.font.size = Pt(8.5)
+        r.font.color.rgb = RGBColor(255, 255, 255)
+
+    onb_data = [
+        ("Día 1: Kickoff y Configuración Cloud", "Aprovisionamiento del entorno Cloud 24/7 y base de datos. Alta de datos de la empresa, sucursales y vinculación de credenciales SOL y Certificado Digital.", "Instancia Cloud 100% activa y conectada a SUNAT."),
+        ("Día 2: Migración de Datos Maestros", "Entrega de plantillas Excel estructuradas. Carga y depuración masiva de Catálogo de Productos con precios, Directorio de Clientes y Proveedores.", "Datos Maestros cargados y validados algorítmicamente."),
+        ("Día 3: Parametrización y Pruebas", "Configuración de cuentas bancarias, almacenes, series correlativas y reglas de crédito. Ejecución de pruebas de emisión de comprobantes y guías GRE.", "Entorno homologado listo para operar."),
+        ("Día 4: Capacitación por Roles", "Entrenamiento práctico guiado para cajeros/vendedores, encargados de logística/almacén y administradores/contadores.", "Personal capacitado con manuales y grabaciones."),
+        ("Día 5: Salida en Vivo (Go-Live)", "Acompañamiento técnico especializado en tiempo real durante la primera jornada de facturación y movimientos de almacén reales.", "Jexia ERP operando en producción con éxito.")
+    ]
+    for i, row in enumerate(onb_data, start=1):
+        for j, val in enumerate(row):
+            cell = tbl_onboarding.cell(i, j)
+            bg = "F8FAFC" if i % 2 == 1 else "FFFFFF"
+            set_cell_background(cell, bg)
+            set_cell_margins(cell, 50, 50, 80, 80)
+            p = cell.paragraphs[0]
+            r = p.add_run(val)
+            r.font.name = "Segoe UI"
+            r.font.size = Pt(8)
+            r.font.color.rgb = COLOR_DARK
+
+    doc.add_paragraph().paragraph_format.space_after = Pt(10)
+
+    style_heading_2("6. Detalle del Paquete de Puesta en Marcha (S/ 700 a S/ 1,000 + IGV)")
+    add_p("El paquete de Puesta en Marcha (inversión única de S/ 700.00 a S/ 1,000.00 + IGV según la complejidad del catálogo) es un servicio 'llave en mano' que asegura que la empresa comience a operar desde el primer día con absoluta certeza técnica. Comprende los siguientes entregables:")
+    add_bullet("Despliegue de la infraestructura SaaS en servidores de alta disponibilidad con certificado de seguridad SSL y respaldos diarios automáticos.", "1. Aprovisionamiento Cloud 24/7 Garantizado: ")
+    add_bullet("Configuración del emisor electrónico, carga del certificado digital (.pfx), enlace con la clave SOL de SUNAT y pruebas de recepción de CDR.", "2. Homologación Tributaria Oficial: ")
+    add_bullet("Revisión, limpieza y carga de listas de artículos, existencias iniciales por almacén, clientes habituales y saldos pendientes.", "3. Migración Asistida de Información: ")
+    add_bullet("Capacitación interactiva en vivo por videoconferencia, acceso a manuales en PDF y sesiones grabadas para futuras consultas del equipo.", "4. Programa de Formación de Usuarios: ")
+    add_bullet("Canal directo y prioritario vía WhatsApp y llamadas para resolución inmediata de dudas durante el primer mes de operación.", "5. Soporte VIP Post-Implementación (30 Días): ")
+
+    style_heading_2("7. Garantías Comerciales y de Continuidad Operativa")
+    add_bullet("El cliente no está atado a contratos anuales forzosos. La calidad, el ahorro y el beneficio diario del sistema son la única razón de renovación mensual.", "Sin Contratos Forzosos: ")
+    add_bullet("La base de datos se respalda automáticamente en la nube todos los días, garantizando disponibilidad del 99.9% frente a cualquier imprevisto.", "Seguridad y Respaldo Continuo: ")
+    add_bullet("Acceso desde cualquier dispositivo (computadora de escritorio, laptop, tablet o celular) sin necesidad de instalaciones complicadas en redes locales.", "100% Accesible en la Nube: ")
+    add_bullet("Equipo de soporte y consultoría localizado en Perú, con dominio pleno de las normativas vigentes de SUNAT, SIRE y el PCGE.", "Soporte Especializado Local: ")
+
+    doc.add_paragraph().paragraph_format.space_after = Pt(14)
 
     output_path1 = os.path.abspath("docs/JEXIA_ERP_DOCUMENTO_PROFESIONAL_MAESTRO.docx")
     output_path2 = os.path.abspath("docs/Documento de alcance JEXIA ERP.docx")
-    doc.save(output_path1)
-    doc.save(output_path2)
-    print(f"Documento Word enriquecido y actualizado con éxito en:\n1. {output_path1}\n2. {output_path2}")
+    
+    try:
+        doc.save(output_path1)
+        print(f"Documento Word actualizado con éxito en: {output_path1}")
+    except PermissionError:
+        print(f"AVISO: {output_path1} está abierto en Word.")
+
+    try:
+        doc.save(output_path2)
+        print(f"Documento Word actualizado con éxito en: {output_path2}")
+    except PermissionError:
+        fallback_path = os.path.abspath("docs/Documento de alcance JEXIA ERP_ACTUALIZADO.docx")
+        doc.save(fallback_path)
+        print(f"AVISO: {output_path2} está abierto en Word. Se guardó una copia idéntica lista en: {fallback_path}")
 
 if __name__ == "__main__":
     create_document()

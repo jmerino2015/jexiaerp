@@ -45,15 +45,8 @@ Inspirado en la madurez funcional de **Odoo 19** y adaptado estrictamente a la r
 
 ## 3. ALCANCE FUNCIONAL DETALLADO (WBS / EDT)
 
-### PAQUETE DE TRABAJO 1: IDENTIDAD CORPORATIVA Y NAVEGACIÓN (UI/UX)
-- **1.1 Componente JexiaLogo:** Logotipo SVG oficial con las 3 barras de crecimiento tricolor (Naranja `#F97316`, Azul `#2563EB`, Verde `#10B981`), soporte elíptico base y lema *"Ordena, controla y haz crecer tu negocio"*. Implementado en Sidebar, Login, favicon y encabezados PDF.
-- **1.2 Sidebar Plegable:** Barra lateral con animación suave (`translate-x`), persistencia de estado mediante `SidebarContext`, badges informativos y capacidad de colapso para visualización óptima en pantallas pequeñas.
-- **1.3 Sistema de Diseño Semántico:** Paleta neutra slate (`#F8FAFC`, `#E2E8F0`, `#0F172A`) combinada con acentos funcionales: Verde Esmeralda `#10B981` (Disponible / Aceptado), Azul `#2563EB` (Primario / Operativo), Ámbar `#F59E0B` (Alerta FEFO / Parcial) y Rojo Carmín `#EF4444` (Vencido / Error).
-
----
-
-### PAQUETE DE TRABAJO 2: GESTIÓN DE DATOS MAESTROS (MASTER DATA MANAGEMENT - MDM)
-- **2.1 Directorio Maestro de Clientes (`Partner` - `isCustomer = true`):**
+### PAQUETE DE TRABAJO 1: GESTIÓN DE DATOS MAESTROS (MASTER DATA MANAGEMENT - MDM)
+- **1.1 Directorio Maestro de Clientes (`Partner` - `isCustomer = true`):**
   - **Identificación Oficial:** Soporte normado para RUC (11 dígitos, Tipo 6 SUNAT), DNI (8 dígitos, Tipo 1), Carnet de Extranjería (Tipo 4) y Pasaporte (Tipo 7) con validación algorítmica de longitud y dígito de control.
   - **Validación de Condición Tributaria:** Detección automática de Razón Social / Nombres, condición de domicilio (Habido / No Habido) y estado de contribuyente (Activo / Baja de Oficio) para garantizar la deducibilidad tributaria.
   - **Georreferenciación y Ubigeo INEI:** Registro de domicilio fiscal y sedes de entrega estructuradas con código de Ubigeo oficial de 6 dígitos (Departamento, Provincia, Distrito) para emisión precisa de comprobantes y guías de remisión.
@@ -61,7 +54,7 @@ Inspirado en la madurez funcional de **Odoo 19** y adaptado estrictamente a la r
   - **Canales de Entrega Digital:** Registro de correos electrónicos corporativos para distribución automática del trinomio digital (XML firmado, CDR oficial y PDF/Ticket), contacto de tesorería y números de mensajería (WhatsApp).
   - **Visión 360° del Cliente:** Resumen integrado en tiempo real de facturas emitidas, cotizaciones activas, cuotas por cobrar, días promedio de pago y saldo de crédito disponible.
 
-- **2.2 Directorio Maestro de Proveedores (`Partner` - `isSupplier = true`):**
+- **1.2 Directorio Maestro de Proveedores (`Partner` - `isSupplier = true`):**
   - **Homologación Fiscal y RUC:** Registro y validación estricta de proveedores con RUC vigente ante SUNAT, alertando de inmediato si el proveedor se encuentra "No Habido" para mitigar contingencias de reparos tributarios en el crédito fiscal del IGV y costo/gasto de renta.
   - **Estructura Financiera y Cuentas Bancarias:**
     - Cuentas corrientes comerciales en Soles (PEN) y Dólares (USD) con número de cuenta y Código de Cuenta Interbancario (CCI de 20 dígitos) para pagos masivos y transferencias interbancarias.
@@ -69,7 +62,7 @@ Inspirado en la madurez funcional de **Odoo 19** y adaptado estrictamente a la r
   - **Términos Comerciales de Abastecimiento:** Condiciones de pago predeterminadas (Contado, Crédito a 30 días, Consignación), moneda de compra habitual y acuerdos de descuento por pronto pago.
   - **Historial y Trazabilidad de Proveedor:** Panel consolidado de órdenes de compra (OC) emitidas, cumplimiento de despachos físicos a almacén, cuentas por pagar (CXP / PCGE 4212) y retenciones o detracciones efectuadas.
 
-- **2.3 Catálogo Maestro de Productos y Servicios (`Product`):**
+- **1.3 Catálogo Maestro de Productos y Servicios (`Product`):**
   - **Identificación y Codificación Universal:**
     - Código SKU interno alfanumérico único para control corporativo.
     - Código de Barras estándar EAN-13 / UPC para lectura óptica con pistolas escáner en cajas POS y terminales de almacén.
@@ -90,56 +83,56 @@ Inspirado en la madurez funcional de **Odoo 19** y adaptado estrictamente a la r
 
 ---
 
-### PAQUETE DE TRABAJO 3: VENTAS Y FACTURACIÓN ELECTRÓNICA SUNAT (UBL 2.1)
-- **3.1 Punto de Venta (POS) y Facturación Directa:** Emisión interactiva de Facturas (`01`) y Boletas de Venta (`03`) con series correlativas automáticas (`F001`, `B001`).
-- **3.2 Motor UBL 2.1 (`UblBuilder`):** Generación de documentos XML estándar UBL 2.1 (`Invoice`, `CreditNote`, `DespatchAdvice`), cálculo de digest value (SHA-256) y generación de Constancia de Recepción (CDR) oficial.
-- **3.3 Notas de Crédito Electrónicas (`07`):** Anulación total o parcial de comprobantes según Catálogo 09 de SUNAT, reintegrando automáticamente el stock físico al Kardex y revirtiendo el impacto contable.
-- **3.4 Régimen de Detracciones SPOT (Banco de la Nación):** Detección de operaciones gravadas con servicios sujetos a detracción (Catálogo 54), cálculo de porcentaje y monto neto, y consignación de la cuenta del Banco de la Nación en el XML y PDF.
-- **3.5 Formatos de Salida Oficiales:** Visor con alternador interactivo entre Formato PDF A4 y Ticket Térmico de 80mm, código QR tributario y botones de descarga de XML y CDR.
+### PAQUETE DE TRABAJO 2: VENTAS Y FACTURACIÓN ELECTRÓNICA SUNAT (UBL 2.1)
+- **2.1 Punto de Venta (POS) y Facturación Directa:** Emisión interactiva de Facturas (`01`) y Boletas de Venta (`03`) con series correlativas automáticas (`F001`, `B001`).
+- **2.2 Motor UBL 2.1 (`UblBuilder`):** Generación de documentos XML estándar UBL 2.1 (`Invoice`, `CreditNote`, `DespatchAdvice`), cálculo de digest value (SHA-256) y generación de Constancia de Recepción (CDR) oficial.
+- **2.3 Notas de Crédito Electrónicas (`07`):** Anulación total o parcial de comprobantes según Catálogo 09 de SUNAT, reintegrando automáticamente el stock físico al Kardex y revirtiendo el impacto contable.
+- **2.4 Régimen de Detracciones SPOT (Banco de la Nación):** Detección de operaciones gravadas con servicios sujetos a detracción (Catálogo 54), cálculo de porcentaje y monto neto, y consignación de la cuenta del Banco de la Nación en el XML y PDF.
+- **2.5 Formatos de Salida Oficiales:** Visor con alternador interactivo entre Formato PDF A4 y Ticket Térmico de 80mm, código QR tributario y botones de descarga de XML y CDR.
 
 ---
 
-### PAQUETE DE TRABAJO 4: E-COMMERCE RETAIL B2C
-- **4.1 Catálogo Web Sincronizado:** Publicación de artículos parametrizados para venta online (`isEcommerce = true`), con fotografías, stock en vivo y precios finales con IGV.
-- **4.2 Carrito y Checkout:** Selección de entrega a domicilio o recojo en tienda, validación de datos del comprador y soporte de pagos digitales (Yape, Plin, Transferencia y Tarjeta).
-- **4.3 Reserva de Stock y Despacho:** Creación inmediata de la orden comercial y descuento en tiempo real para evitar sobreventa.
+### PAQUETE DE TRABAJO 3: E-COMMERCE RETAIL B2C
+- **3.1 Catálogo Web Sincronizado:** Publicación de artículos parametrizados para venta online (`isEcommerce = true`), con fotografías, stock en vivo y precios finales con IGV.
+- **3.2 Carrito y Checkout:** Selección de entrega a domicilio o recojo en tienda, validación de datos del comprador y soporte de pagos digitales (Yape, Plin, Transferencia y Tarjeta).
+- **3.3 Reserva de Stock y Despacho:** Creación inmediata de la orden comercial y descuento en tiempo real para evitar sobreventa.
 
 ---
 
-### PAQUETE DE TRABAJO 5: COMPRAS Y GESTIÓN DE ABASTECIMIENTO
-- **5.1 Órdenes de Compra (OC):** Registro de pedidos a proveedores con series (`OC01`), asignación de almacén receptor y condiciones de pago.
-- **5.2 Recepción de Mercadería e Impacto Logístico:** Recepción total o parcial de artículos, actualización automática del costo promedio ponderado y creación de movimiento `ENTRADA_COMPRA` en Kardex.
-- **5.3 Cuentas por Pagar Automáticas:** Generación del pasivo comercial con el proveedor y programación de fecha de vencimiento.
+### PAQUETE DE TRABAJO 4: COMPRAS Y GESTIÓN DE ABASTECIMIENTO
+- **4.1 Órdenes de Compra (OC):** Registro de pedidos a proveedores con series (`OC01`), asignación de almacén receptor y condiciones de pago.
+- **4.2 Recepción de Mercadería e Impacto Logístico:** Recepción total o parcial de artículos, actualización automática del costo promedio ponderado y creación de movimiento `ENTRADA_COMPRA` en Kardex.
+- **4.3 Cuentas por Pagar Automáticas:** Generación del pasivo comercial con el proveedor y programación de fecha de vencimiento.
 
 ---
 
-### PAQUETE DE TRABAJO 6: INVENTARIO, LOGÍSTICA MULTI-ALMACÉN Y TRAZABILIDAD (FEFO)
-- **6.1 Catálogo de Productos Paramétrico:** Gestión de SKUs, unidades de medida normalizadas (NIU, KGM, ZZ, etc.), tipos de afectación al IGV (10, 20, 30), stock mínimo y fotografías asociadas.
-- **6.2 Kardex Valorizado Ponderado (Formato SUNAT 13.1):** Registro inmutable de cada entrada, salida y saldo valorizado con su respectivo costo unitario ponderado móvil.
-- **6.3 Transferencias Multi-Almacén y Guía de Remisión Remitente (GRE 09):** Traslado físico de mercadería entre almacenes de la empresa con generación simultánea de la Guía de Remisión Electrónica Remitente UBL 2.1 `DespatchAdvice`, registro de transportista, conductor, vehículo, pesos y puntos de partida/llegada.
-- **6.4 Control de Lotes y Fechas de Vencimiento (`ProductLot`):** Asignación de partidas de producción o compra a lotes específicos, cálculo dinámico de días de vigencia, alertas preventivas de caducidad y despacho priorizado por política FEFO (*First Expired, First Out*).
+### PAQUETE DE TRABAJO 5: INVENTARIO, LOGÍSTICA MULTI-ALMACÉN Y TRAZABILIDAD (FEFO)
+- **5.1 Catálogo de Productos Paramétrico:** Gestión de SKUs, unidades de medida normalizadas (NIU, KGM, ZZ, etc.), tipos de afectación al IGV (10, 20, 30), stock mínimo y fotografías asociadas.
+- **5.2 Kardex Valorizado Ponderado (Formato SUNAT 13.1):** Registro inmutable de cada entrada, salida y saldo valorizado con su respectivo costo unitario ponderado móvil.
+- **5.3 Transferencias Multi-Almacén y Guía de Remisión Remitente (GRE 09):** Traslado físico de mercadería entre almacenes de la empresa con generación simultánea de la Guía de Remisión Electrónica Remitente UBL 2.1 `DespatchAdvice`, registro de transportista, conductor, vehículo, pesos y puntos de partida/llegada.
+- **5.4 Control de Lotes y Fechas de Vencimiento (`ProductLot`):** Asignación de partidas de producción o compra a lotes específicos, cálculo dinámico de días de vigencia, alertas preventivas de caducidad y despacho priorizado por política FEFO (*First Expired, First Out*).
 
 ---
 
-### PAQUETE DE TRABAJO 7: COBRANZAS, PAGOS, CUOTAS Y CONCILIACIÓN (CXC / CXP)
-- **7.1 Cuentas por Cobrar (Clientes - PCGE 1212):** Monitoreo de facturas emitidas a crédito, semáforo de morosidad y cálculo de saldos pendientes en tiempo real.
-- **7.2 Cuentas por Pagar (Proveedores - PCGE 4212):** Supervisión de deudas comerciales y pagos pendientes por recepción de mercaderías.
-- **7.3 Cronograma de Cuotas (`PaymentSchedule`):** División del saldo en cuotas con fechas de vencimiento preestablecidas para cumplimiento de la normativa SUNAT de crédito.
-- **7.4 Registro de Cobros/Pagos y Conciliación Bancaria (`PaymentRecord`):** Ingreso de comprobantes de pago bancarios (BCP, BBVA, etc.), vouchers u operaciones de caja, con amortización cronológica (FIFO) y generación inmediata del asiento contable en el Libro Diario.
+### PAQUETE DE TRABAJO 6: COBRANZAS, PAGOS, CUOTAS Y CONCILIACIÓN (CXC / CXP)
+- **6.1 Cuentas por Cobrar (Clientes - PCGE 1212):** Monitoreo de facturas emitidas a crédito, semáforo de morosidad y cálculo de saldos pendientes en tiempo real.
+- **6.2 Cuentas por Pagar (Proveedores - PCGE 4212):** Supervisión de deudas comerciales y pagos pendientes por recepción de mercaderías.
+- **6.3 Cronograma de Cuotas (`PaymentSchedule`):** División del saldo en cuotas con fechas de vencimiento preestablecidas para cumplimiento de la normativa SUNAT de crédito.
+- **6.4 Registro de Cobros/Pagos y Conciliación Bancaria (`PaymentRecord`):** Ingreso de comprobantes de pago bancarios (BCP, BBVA, etc.), vouchers u operaciones de caja, con amortización cronológica (FIFO) y generación inmediata del asiento contable en el Libro Diario.
 
 ---
 
-### PAQUETE DE TRABAJO 8: CONTABILIDAD GENERAL EMPRESARIAL (PCGE 2019) Y LIBROS ELECTRÓNICOS
-- **8.1 Plan Contable Integral:** Cuentas predefinidas a 5 dígitos para Elementos 1, 2, 4, 6 y 7 del PCGE 2019.
-- **8.2 Asientos Automáticos en Tiempo Real:** Asiento de Venta, Asiento de Costo de Ventas, Asiento de Compra, Asiento de Cobranza (`1041 ➔ 1212`) y Asiento de Pago a Proveedor (`4212 ➔ 1041`).
-- **8.3 Exportación a SIRE y PLE:** Generación de estructuras de datos para SIRE RVIE 14.1, SIRE RCE 8.1 y PLE Libro Diario 5.1.
+### PAQUETE DE TRABAJO 7: CONTABILIDAD GENERAL EMPRESARIAL (PCGE 2019) Y LIBROS ELECTRÓNICOS
+- **7.1 Plan Contable Integral:** Cuentas predefinidas a 5 dígitos para Elementos 1, 2, 4, 6 y 7 del PCGE 2019.
+- **7.2 Asientos Automáticos en Tiempo Real:** Asiento de Venta, Asiento de Costo de Ventas, Asiento de Compra, Asiento de Cobranza (`1041 ➔ 1212`) y Asiento de Pago a Proveedor (`4212 ➔ 1041`).
+- **7.3 Exportación a SIRE y PLE:** Generación de estructuras de datos para SIRE RVIE 14.1, SIRE RCE 8.1 y PLE Libro Diario 5.1.
 
 ---
 
-### PAQUETE DE TRABAJO 9: ANALÍTICA Y REPORTES GERENCIALES
-- **9.1 Reportes de Ventas:** Resúmenes mensuales, trimestrales y anuales desagregados por producto, cliente y vendedor.
-- **9.2 Reportes de Cartera y Morosidad:** Antigüedad de saldos (por vencer, 1-30 días, 31-60 días y 60+ días de retraso).
-- **9.3 Reportes de Inventario:** Valorización global por almacén y alertas de rotación baja.
+### PAQUETE DE TRABAJO 8: ANALÍTICA Y REPORTES GERENCIALES
+- **8.1 Reportes de Ventas:** Resúmenes mensuales, trimestrales y anuales desagregados por producto, cliente y vendedor.
+- **8.2 Reportes de Cartera y Morosidad:** Antigüedad de saldos (por vencer, 1-30 días, 31-60 días y 60+ días de retraso).
+- **8.3 Reportes de Inventario:** Valorización global por almacén y alertas de rotación baja.
 
 ---
 
@@ -211,6 +204,30 @@ El sistema se considerará formalmente aprobado cuando se cumpla con:
 - **Fase 2.1:** Integración directa con pasarelas de pago peruanas (Culqi, Niubiz, Mercado Pago) mediante Webhooks automáticos.
 - **Fase 2.2:** Envío automatizado de comprobantes electrónicos PDF y XML por correo electrónico y WhatsApp Business API.
 - **Fase 2.3:** Aplicación móvil nativa para toma de pedidos en ruta por vendedores de campo con sincronización en segundo plano.
+
+---
+
+## 9. ESTRATEGIA COMERCIAL, PUESTA EN MARCHA Y RETORNO DE INVERSIÓN (ROI)
+
+### 9.1 Modelo de Suscripción SaaS y Planes Mensuales
+Jexia ERP opera bajo suscripción SaaS con infraestructura en la nube 24/7 y conexión directa SOAP con SUNAT (sin intermediarios OSE que encarezcan la emisión):
+- **Plan Emprendedor (S/ 180 + IGV / mes):** 2 usuarios, 1 almacén, hasta 500 comprobantes/mes.
+- **Plan PYME Pro — ★ RECOMENDADO ★ (S/ 300 + IGV / mes):** 5 usuarios concurrentes, 1 empresa RUC, **Almacenes Ilimitados**, hasta **2,000 comprobantes/mes**, **GRE 09 Ilimitadas**, Kardex 13.1 + Lotes FEFO, finanzas con cuotas a crédito y exportación a SIRE / PLE 5.1.
+- **Plan Corporativo (S/ 490 + IGV / mes):** 10 usuarios, comprobantes ilimitados, multi-empresa opcional y soporte extendido.
+
+### 9.2 Paquete de Puesta en Marcha y Onboarding Acelerado (Pago Único: S/ 700 a S/ 1,000 + IGV)
+Servicio integral "llave en mano" para garantizar que la empresa opere con total seguridad técnica desde el primer día:
+1. **Aprovisionamiento Cloud 24/7 Dedicado:** Despliegue de base de datos PostgreSQL y frontend Next.js 15 en servidores de alta disponibilidad con certificado de seguridad SSL.
+2. **Homologación y Vinculación con SUNAT:** Carga de certificado digital (.pfx), enlace de credenciales SOL secundarias y pruebas de timbrado en entornos beta y producción.
+3. **Migración Asistida de Datos Maestros:** Depuración y carga masiva mediante plantillas Excel de productos, clientes, proveedores, listas de precios y saldos iniciales de inventario por almacén.
+4. **Capacitación Especializada por Roles:** Entrenamiento práctico grabado para cajeros/vendedores, jefes de almacén y administradores/contadores.
+5. **Acompañamiento VIP (30 Días):** Soporte técnico prioritario y canal directo de resolución de consultas operativas durante el primer mes.
+
+### 9.3 Retorno de Inversión Inmediato (ROI) para el Cliente
+- **Ahorro en Mermas:** Ahorro mensual estimado de **S/ 1,500 a S/ 3,500** al erradicar pérdidas por caducidad gracias al semáforo visual FEFO y costeo móvil.
+- **Eficiencia en Ventas:** Reducción del **90% en tiempos de atención**, emitiendo boletas y facturas en menos de 15 segundos.
+- **Blindaje Tributario:** Cero sanciones y multas de SUNAT por atraso en libros electrónicos SIRE / PLE o rechazo de comprobantes.
+- **Recuperación de Cartera:** Recuperación de hasta un **35% de cuentas por cobrar morosas** con el control de cronogramas y cuotas a crédito.
 
 ---
 *Documento de Alcance oficial para Jexia ERP v2.0.*
