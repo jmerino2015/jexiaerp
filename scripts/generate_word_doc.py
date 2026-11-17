@@ -320,7 +320,7 @@ def create_document():
     add_bullet(" En el mismo milisegundo en que se crea el comprobante o se concilia un cobro, se genera el asiento de partida doble en el Libro Diario.", "Contabilidad Oficial PCGE: ")
 
     style_heading_2("2. Estructura de Desglose del Trabajo (WBS / EDT)")
-    tbl_wbs = doc.add_table(rows=9, cols=3)
+    tbl_wbs = doc.add_table(rows=10, cols=3)
     tbl_wbs.alignment = WD_TABLE_ALIGNMENT.CENTER
     wbs_headers = ["Paquete EDT", "Módulos y Capacidades del Sistema", "Base Normativa"]
     for j, h in enumerate(wbs_headers):
@@ -336,13 +336,14 @@ def create_document():
 
     wbs_data = [
         ("EDT 01: Identidad & UX", "Logotipo tricolor SVG, Sidebar colapsable animado, semáforo visual de colores.", "Guía de Estilo Jexia"),
-        ("EDT 02: Ventas & Facturación", "POS, Facturas 01, Boletas 03, Cotizaciones, Notas de Crédito 07, Detracciones SPOT, A4 y Ticket.", "SUNAT UBL 2.1 / D.L. 940"),
-        ("EDT 03: E-commerce Retail", "Catálogo B2C online, carrito, checkout delivery/pickup, pasarelas de pago y facturación.", "Comercio Electrónico"),
-        ("EDT 04: Compras & Costos", "Órdenes de Compra (OC01), recepción de mercadería, cálculo automático de costo promedio.", "Abastecimiento"),
-        ("EDT 05: Inventario & Logística", "Kardex 13.1, Lotes y FEFO (ProductLot), Transferencias Multi-Almacén y GRE 09.", "SUNAT Res. 123-2022"),
-        ("EDT 06: Cobranzas & Pagos", "Cuentas por cobrar (1212), cuentas por pagar (4212), cuotas a crédito, conciliación bancaria.", "SUNAT Res. 193-2020 / PCGE"),
-        ("EDT 07: Contabilidad General", "Plan contable a 5 dígitos, Libro Diario automático, exportación SIRE (RVIE/RCE) y PLE 5.1.", "PCGE 2019 / MEF"),
-        ("EDT 08: Analítica & KPIs", "Márgenes brutos, envejecimiento de cartera, rotación de existencias y ranking de productos.", "Gestión Gerencial")
+        ("EDT 02: Datos Maestros (MDM)", "Directorio de Clientes (RUC/DNI/Ubigeo), Proveedores (CCI/Banco de la Nación SPOT) y Catálogo de Productos (SKU/EAN-13/UNSPSC).", "R.S. 193-2020 / Cat. 03, 07, 25, 54"),
+        ("EDT 03: Ventas & Facturación", "POS, Facturas 01, Boletas 03, Cotizaciones, Notas de Crédito 07, Detracciones SPOT, A4 y Ticket.", "SUNAT UBL 2.1 / D.L. 940"),
+        ("EDT 04: E-commerce Retail", "Catálogo B2C online, carrito, checkout delivery/pickup, pasarelas de pago y facturación.", "Comercio Electrónico"),
+        ("EDT 05: Compras & Costos", "Órdenes de Compra (OC01), recepción de mercadería, cálculo automático de costo promedio.", "Abastecimiento"),
+        ("EDT 06: Inventario & Logística", "Kardex 13.1, Lotes y FEFO (ProductLot), Transferencias Multi-Almacén y GRE 09.", "SUNAT Res. 123-2022"),
+        ("EDT 07: Cobranzas & Pagos", "Cuentas por cobrar (1212), cuentas por pagar (4212), cuotas a crédito, conciliación bancaria.", "SUNAT Res. 193-2020 / PCGE"),
+        ("EDT 08: Contabilidad General", "Plan contable a 5 dígitos, Libro Diario automático, exportación SIRE (RVIE/RCE) y PLE 5.1.", "PCGE 2019 / MEF"),
+        ("EDT 09: Analítica & KPIs", "Márgenes brutos, envejecimiento de cartera, rotación de existencias y ranking de productos.", "Gestión Gerencial")
     ]
     for i, row in enumerate(wbs_data, start=1):
         for j, val in enumerate(row):
@@ -356,6 +357,17 @@ def create_document():
             r.font.size = Pt(8.5)
             r.font.color.rgb = COLOR_DARK
 
+    doc.add_paragraph().paragraph_format.space_after = Pt(8)
+
+    style_heading_2("3. Gestión Integral de Datos Maestros (Master Data Management - MDM)")
+    add_p("El principio rector de Jexia ERP establece que la calidad de los procesos transaccionales (facturación, compras, inventario y contabilidad) depende estrictamente del gobierno centralizado y la consistencia de sus Datos Maestros. El sistema estructura la información base en tres entidades maestras inviolables:")
+    
+    add_bullet("Centraliza los datos de personas naturales y jurídicas. Incluye validación de RUC (11 dígitos, Tipo 6 SUNAT) y DNI (8 dígitos, Tipo 1) con verificación de estado tributario (Activo/Habido), georreferenciación oficial por código de Ubigeo INEI a 6 dígitos (Departamento, Provincia, Distrito), asignación de listas de precios (Minorista, Mayorista, Distribuidor), límites de crédito comercial en PEN/USD, plazos a crédito normados (Res. 193-2020) y buzón de correo para despacho electrónico automático del XML, CDR y PDF.", "3.1 Maestro de Clientes (Directorio Comercial): ")
+
+    add_bullet("Homologación rigurosa de empresas proveedoras de bienes y servicios para garantizar la deducibilidad tributaria del crédito fiscal de IGV y gasto del Impuesto a la Renta. Administra cuentas bancarias comerciales con Código de Cuenta Interbancario (CCI a 20 dígitos) para pagos masivos y Cuenta Corriente de Detracciones del Banco de la Nación (11 dígitos) obligatoria para transacciones sujetas a SPOT (D.L. 940).", "3.2 Maestro de Proveedores (Directorio de Abastecimiento): ")
+
+    add_bullet("Matriz central de bienes tangibles y servicios. Incorpora triple codificación (SKU interno único, Código de barras universal EAN-13/UPC para lectores ópticos y Código de Producto SUNAT UNSPSC a 8 dígitos según Catálogo 25), unidad de medida estándar (Catálogo 03: NIU, ZZ, BX, KGM, MTR), régimen tributario de afectación al IGV (10 Gravado, 20 Exonerado, 30 Inafecto), sujeción a detracción SPOT (Catálogo 54), mapeo contable PCGE automático (Cuentas 70121, 60111, 20111, 69121, 61111), costeo promedio ponderado móvil en Kardex 13.1, stocks mínimos por almacén, trazabilidad de lotes con caducidad FEFO y sincronización directa con la tienda E-commerce retail.", "3.3 Catálogo Maestro de Productos y Servicios: ")
+
     doc.add_page_break()
 
     # =========================================================================
@@ -363,6 +375,152 @@ def create_document():
     # =========================================================================
     style_heading_1("PARTE II: MANUAL DE OPERACIONES Y FUNCIONALIDADES DETALLADAS")
     add_p("La presente sección documenta cada proceso bajo la estructura técnica de los manuales de referencia mundial (Odoo y Defontana), desglosando objetivo, prerrequisitos, campos del formulario, reglas de negocio, impacto contable y kardex.")
+
+    # -------------------------------------------------------------------------
+    # PROCESO 0.1: MAESTRO DE CLIENTES
+    # -------------------------------------------------------------------------
+    style_heading_2("Proceso 0.1: Gestión y Alta de Datos Maestros de Clientes")
+    add_p("0.1.1 Objetivo del Proceso: ", "A. ")
+    add_p("Registrar, normalizar y administrar el directorio de clientes corporativos y consumidores finales, asegurando la validez tributaria del documento de identidad ante SUNAT/RENIEC, configurando políticas de crédito comercial y habilitando los canales para la entrega automática de comprobantes electrónicos.")
+
+    add_p("0.1.2 Prerrequisitos de Operación: ", "B. ")
+    add_bullet("Contar con el número de RUC (11 dígitos) o DNI (8 dígitos) del cliente.")
+    add_bullet("Definición previa de las listas de precios de la empresa y políticas de crédito.")
+
+    add_p("0.1.3 Estructura de Campos del Formulario Maestro de Clientes: ", "C. ")
+    tbl_cli_fields = doc.add_table(rows=8, cols=4)
+    tbl_cli_fields.alignment = WD_TABLE_ALIGNMENT.CENTER
+    cli_f_headers = ["Campo", "Tipo / Formato", "Obligatorio", "Descripción y Regla de Negocio"]
+    for j, h in enumerate(cli_f_headers):
+        cell = tbl_cli_fields.cell(0, j)
+        set_cell_background(cell, "0F172A")
+        set_cell_margins(cell, 70, 70, 90, 90)
+        p = cell.paragraphs[0]
+        r = p.add_run(h)
+        r.bold = True
+        r.font.name = "Segoe UI"
+        r.font.size = Pt(8.5)
+        r.font.color.rgb = RGBColor(255, 255, 255)
+
+    cli_fields = [
+        ("Tipo de Documento", "Selector (RUC, DNI, CE, PASAPORTE)", "Sí", "Define el tipo de documento según Catálogo 06 de SUNAT (6=RUC, 1=DNI, 4=CE, 7=Pasaporte)."),
+        ("Número de Documento", "Texto numérico (11 o 8 dígitos)", "Sí", "Valida longitud y algoritmo de dígito verificador. Consulta condición Habido y Activo."),
+        ("Razón Social / Nombres", "Texto libre", "Sí", "Nombre legal del cliente. Se imprime en el encabezado de la Factura o Boleta."),
+        ("Nombre Comercial / Alias", "Texto opcional", "No", "Nombre de fantasía o sucursal para búsqueda ágil en mostrador POS."),
+        ("Dirección y Ubigeo INEI", "Texto y selector a 6 dígitos", "Sí (Factura)", "Domicilio fiscal estructurado (Dep/Prov/Dist) exigido por SUNAT para traslado y entrega."),
+        ("Correo de Facturación", "Email válido", "Sí (FE)", "Buzón electrónico donde el sistema envía automáticamente el XML, CDR y PDF oficial."),
+        ("Línea de Crédito y Plazo", "Moneda (S/ PEN) y Días", "No", "Monto máximo autorizado y plazo acordado (15, 30, 45 días) para cuotas a crédito.")
+    ]
+    for i, row in enumerate(cli_fields, start=1):
+        for j, val in enumerate(row):
+            cell = tbl_cli_fields.cell(i, j)
+            bg = "F8FAFC" if i % 2 == 1 else "FFFFFF"
+            set_cell_background(cell, bg)
+            set_cell_margins(cell, 50, 50, 80, 80)
+            p = cell.paragraphs[0]
+            r = p.add_run(val)
+            r.font.name = "Segoe UI"
+            r.font.size = Pt(8)
+            r.font.color.rgb = COLOR_DARK
+
+    doc.add_paragraph().paragraph_format.space_after = Pt(4)
+
+    # -------------------------------------------------------------------------
+    # PROCESO 0.2: MAESTRO DE PROVEEDORES
+    # -------------------------------------------------------------------------
+    style_heading_2("Proceso 0.2: Homologación y Registro del Maestro de Proveedores")
+    add_p("0.2.1 Objetivo del Proceso: ", "A. ")
+    add_p("Homologar y registrar a los proveedores de bienes y servicios de la empresa, validando su condición de contribuyente Habido ante SUNAT para proteger el derecho al crédito fiscal del IGV, y estructurando sus cuentas bancarias comerciales y de detracciones SPOT para tesorería.")
+
+    add_p("0.2.2 Prerrequisitos de Operación: ", "B. ")
+    add_bullet("RUC activo del proveedor verificado en el portal SUNAT.")
+    add_bullet("Certificación bancaria con Código de Cuenta Interbancario (CCI) y número de cuenta de detracciones BN si aplica.")
+
+    add_p("0.2.3 Estructura de Campos del Formulario Maestro de Proveedores: ", "C. ")
+    tbl_prov_fields = doc.add_table(rows=7, cols=4)
+    tbl_prov_fields.alignment = WD_TABLE_ALIGNMENT.CENTER
+    for j, h in enumerate(cli_f_headers):
+        cell = tbl_prov_fields.cell(0, j)
+        set_cell_background(cell, "0F172A")
+        set_cell_margins(cell, 70, 70, 90, 90)
+        p = cell.paragraphs[0]
+        r = p.add_run(h)
+        r.bold = True
+        r.font.name = "Segoe UI"
+        r.font.size = Pt(8.5)
+        r.font.color.rgb = RGBColor(255, 255, 255)
+
+    prov_fields = [
+        ("RUC del Proveedor", "Numérico 11 dígitos", "Sí", "Identificador tributario Tipo 6 SUNAT. Valida obligatoriamente condición de Habido."),
+        ("Razón Social y Dirección", "Texto alfanumérico", "Sí", "Nombre legal del proveedor y dirección de recojo o despacho con código de Ubigeo."),
+        ("Cuentas Comerciales y CCI", "Texto (20 dígitos CCI)", "Sí", "Cuentas bancarias (BCP, BBVA, Interbank, etc.) para abono y transferencias masivas."),
+        ("Cuenta Detracciones BN", "Texto (11 dígitos)", "Condicional", "Cuenta Corriente en el Banco de la Nación para depósito obligatorio de SPOT (D.L. 940)."),
+        ("Términos de Compra", "Selector (Contado / Crédito)", "Sí", "Condición contractual habitual (ej. Factura a 30 días con cuotas pactadas)."),
+        ("Contacto y Teléfono", "Texto y número", "No", "Ejecutivo de cuentas para seguimiento de órdenes de compra y facturación electrónica.")
+    ]
+    for i, row in enumerate(prov_fields, start=1):
+        for j, val in enumerate(row):
+            cell = tbl_prov_fields.cell(i, j)
+            bg = "F8FAFC" if i % 2 == 1 else "FFFFFF"
+            set_cell_background(cell, bg)
+            set_cell_margins(cell, 50, 50, 80, 80)
+            p = cell.paragraphs[0]
+            r = p.add_run(val)
+            r.font.name = "Segoe UI"
+            r.font.size = Pt(8)
+            r.font.color.rgb = COLOR_DARK
+
+    doc.add_paragraph().paragraph_format.space_after = Pt(4)
+
+    # -------------------------------------------------------------------------
+    # PROCESO 0.3: MAESTRO DE PRODUCTOS Y SERVICIOS
+    # -------------------------------------------------------------------------
+    style_heading_2("Proceso 0.3: Catalogación y Parametrización del Maestro de Productos")
+    add_p("0.3.1 Objetivo del Proceso: ", "A. ")
+    add_p("Parametrizar de forma integral los artículos comerciales y servicios de la empresa, definiendo su tipología fiscal, códigos de trazabilidad (SKU, EAN-13, UNSPSC), parámetros de inventario multialmacén, control de vencimiento FEFO y vinculación contable automática.")
+
+    add_p("0.3.2 Prerrequisitos de Operación: ", "B. ")
+    add_bullet("Estructura de categorías y marcas definida en el sistema.")
+    add_bullet("Determinación de la afectación tributaria al IGV (Gravado 10, Exonerado 20 o Inafecto 30) y código SUNAT.")
+
+    add_p("0.3.3 Estructura de Campos del Formulario de Catálogo de Productos: ", "C. ")
+    tbl_prod_fields = doc.add_table(rows=10, cols=4)
+    tbl_prod_fields.alignment = WD_TABLE_ALIGNMENT.CENTER
+    for j, h in enumerate(cli_f_headers):
+        cell = tbl_prod_fields.cell(0, j)
+        set_cell_background(cell, "0F172A")
+        set_cell_margins(cell, 70, 70, 90, 90)
+        p = cell.paragraphs[0]
+        r = p.add_run(h)
+        r.bold = True
+        r.font.name = "Segoe UI"
+        r.font.size = Pt(8.5)
+        r.font.color.rgb = RGBColor(255, 255, 255)
+
+    prod_fields = [
+        ("Código SKU", "Alfanumérico único", "Sí", "Código interno de referencia rápida en la empresa para control de inventarios."),
+        ("Código de Barras (EAN-13)", "Numérico 13 dígitos", "No", "Código de barras óptico escaneable con pistolas lectoras en mostrador POS."),
+        ("Código SUNAT (UNSPSC)", "Numérico 8 dígitos", "Sí (FE)", "Código del Catálogo 25 de SUNAT exigido para emisión de Facturación UBL 2.1."),
+        ("Descripción / Nombre", "Texto descriptivo", "Sí", "Denominación comercial del producto. Se imprime en comprobantes y tienda web."),
+        ("Tipo de Ítem", "Bien Físico / Servicio", "Sí", "Determina si el producto afecta el Kardex físico o es un intangible sin stock."),
+        ("Unidad de Medida", "Selector Catálogo 03 SUNAT", "Sí", "Unidad oficial: NIU (Unidades), ZZ (Servicios), BX (Cajas), KGM (Kilogramos)."),
+        ("Tipo de Afectación IGV", "Selector Catálogo 07", "Sí", "10=Gravado Oneroso (18%), 20=Exonerado (Apéndice I), 30=Inafecto por ley."),
+        ("Sujeción a SPOT", "Check y Código Cat. 54", "Condicional", "Si aplica detracción, consigna el código de servicio y porcentaje (ej. 12%)."),
+        ("Precios y Stock Mínimo", "Valores numéricos en S/", "Sí", "Precio de Venta al Público (PVP con IGV) y umbral de alerta para reposición.")
+    ]
+    for i, row in enumerate(prod_fields, start=1):
+        for j, val in enumerate(row):
+            cell = tbl_prod_fields.cell(i, j)
+            bg = "F8FAFC" if i % 2 == 1 else "FFFFFF"
+            set_cell_background(cell, bg)
+            set_cell_margins(cell, 50, 50, 80, 80)
+            p = cell.paragraphs[0]
+            r = p.add_run(val)
+            r.font.name = "Segoe UI"
+            r.font.size = Pt(8)
+            r.font.color.rgb = COLOR_DARK
+
+    doc.add_paragraph().paragraph_format.space_after = Pt(8)
 
     # -------------------------------------------------------------------------
     # PROCESO 1: VENTAS Y FACTURACIÓN ELECTRÓNICA
@@ -697,9 +855,11 @@ def create_document():
     style_heading_2("Conclusión del Manual y Especificación de la Solución")
     add_p("Jexia ERP v2.0 reúne la potencia funcional de los grandes sistemas de gestión con la simplicidad, agilidad y economía que exigen las empresas peruanas. Al combinar una arquitectura técnica robusta, conexión directa con SUNAT y un modelo comercial justo de S/ 300 mensuales, se consolida como la herramienta definitiva para ordenar, controlar y hacer crecer los negocios en el Perú.")
 
-    output_path = os.path.abspath("docs/JEXIA_ERP_DOCUMENTO_PROFESIONAL_MAESTRO.docx")
-    doc.save(output_path)
-    print(f"Documento Word enriquecido y actualizado con éxito en: {output_path}")
+    output_path1 = os.path.abspath("docs/JEXIA_ERP_DOCUMENTO_PROFESIONAL_MAESTRO.docx")
+    output_path2 = os.path.abspath("docs/Documento de alcance JEXIA ERP.docx")
+    doc.save(output_path1)
+    doc.save(output_path2)
+    print(f"Documento Word enriquecido y actualizado con éxito en:\n1. {output_path1}\n2. {output_path2}")
 
 if __name__ == "__main__":
     create_document()
